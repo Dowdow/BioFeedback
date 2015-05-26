@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">BioFeedback</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_biofeedback">BiofeedbackActivity</string>
+    <string name="title_activity_belt">BeltActivity</string>
+
+    <string name="main_boutton1">BioFeedback</string>
+    <string name="main_boutton2">Connecter ceinture</string>
+
+
+
 </resources>
