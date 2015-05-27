@@ -12,15 +12,15 @@
 
     <ImageView
         android:layout_width="500dp"
-        android:layout_height="300dp"
+        android:layout_height="200dp"
         android:id="@+id/imageView"
         android:src="@drawable/logo"
-        android:layout_marginTop="111dp"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp" />
 
     <Button
-        android:layout_width="350dp"
+        android:layout_width="300dp"
         android:layout_height="70dp"
         android:text="@string/main_boutton1"
         android:id="@+id/button"
@@ -29,27 +29,26 @@
         android:background="#84e7ae"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
-        android:textSize="@dimen/button_text_size"
+        android:layout_marginTop="30dp"
         android:layout_below="@+id/imageView"
         android:layout_alignLeft="@+id/button2"
         android:layout_alignStart="@+id/button2"
-        android:layout_marginTop="40dp"
-        />
+        android:textSize="@dimen/button_land_text_size"/>
 
     <Button
-        android:layout_width="350dp"
+        android:layout_width="300dp"
         android:layout_height="70dp"
         android:text="@string/main_boutton2"
         android:id="@+id/button2"
         android:layout_below="@+id/button"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="35dp"
         android:onClick="openBeltActivity"
         android:textColor="#FFFFFF"
         android:background="#84e7ae"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
-        android:textSize="@dimen/button_text_size"
-        android:layout_marginTop="30dp"
+        android:textSize="@dimen/button_land_text_size"
         />
 
 
