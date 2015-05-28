@@ -12,6 +12,7 @@
     <string name="biofeedback_phase3">Phase d\'experimentation</string>
     <string name="biofeedback_phase4">Phase de repos</string>
 
-
-
+    <string name="belt_activer">Activer Bluetooth</string>
+    <string name="belt_desactiver">Désactiver Bluetooth</string>
+    <string name="belt_search">Chercher ceinture</string>
 </resources>
