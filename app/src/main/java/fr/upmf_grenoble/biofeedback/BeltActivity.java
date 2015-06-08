@@ -18,15 +18,21 @@ import android.widget.Toast;
 
 import java.util.Set;
 
+import belt_connector.BeltConnector;
+import belt_connector.BeltConnectorZephyr;
+
 
 public class BeltActivity extends Activity {
 
     private BluetoothAdapter bluetoothAdapter;
     private ArrayAdapter<String> arrayDevices;
+    private BeltConnector beltConnector;
 
     private Button buttonBluetooth;
     private Button buttonSearch;
+    private Button buttonTest;
     private ListView listDevices;
+    private String macAddressSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +47,10 @@ public class BeltActivity extends Activity {
             Toast.makeText(this,"Votre appareil ne supporte pas le bluetooth",Toast.LENGTH_LONG).show();
         }
 
+        // Mise en place du bouton de test
+        buttonTest = (Button) findViewById(R.id.button_belt_test);
+        buttonTest.setOnClickListener(clickListener);
+
         // Mise en place du bouton de recherche
         buttonSearch = (Button) findViewById(R.id.button_belt_search);
         buttonSearch.setOnClickListener(clickListener);
@@ -54,11 +64,13 @@ public class BeltActivity extends Activity {
             } else {
                 buttonBluetooth.setText(R.string.belt_activer);
                 buttonSearch.setClickable(false);
+                buttonTest.setClickable(false);
             }
         } else {
             buttonBluetooth.setText(R.string.belt_incompatible);
             buttonBluetooth.setClickable(false);
             buttonSearch.setClickable(false);
+            buttonTest.setClickable(false);
         }
 
         // Mise en place de la liste de devices
@@ -81,10 +93,12 @@ public class BeltActivity extends Activity {
                         bluetoothAdapter.disable();
                         buttonBluetooth.setText(R.string.belt_activer);
                         buttonSearch.setClickable(false);
+                        buttonTest.setClickable(false);
                     } else {
                         bluetoothAdapter.enable();
                         buttonBluetooth.setText(R.string.belt_desactiver);
                         buttonSearch.setClickable(true);
+                        buttonTest.setClickable(true);
                     }
                     break;
                 // Case button search
@@ -102,6 +116,18 @@ public class BeltActivity extends Activity {
                     }
                     bluetoothAdapter.startDiscovery();
                     break;
+                // Case button test
+                case R.id.button_belt_test:
+                    if(macAddressSelected == null) {
+                        Toast.makeText(getApplicationContext(),"Vous devez selectionner un périphérique",Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    if(bluetoothAdapter.isDiscovering()) {
+                        bluetoothAdapter.cancelDiscovery();
+                    }
+                    beltConnector = new BeltConnectorZephyr(macAddressSelected);
+                    beltConnector.start();
+                    break;
             }
         }
     };
@@ -113,6 +139,7 @@ public class BeltActivity extends Activity {
             TextView selected = (TextView) view;
             String[] text = selected.getText().toString().split("\n");
             device.setText("Périphérique selectionné : " + text[0]);
+            macAddressSelected = text[1];
         }
     };
 
