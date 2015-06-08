@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -36,8 +37,8 @@ public class BeltActivity extends Activity {
 
         // Instanciation de BluetoothAdapter
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (buttonBluetooth == null) {
-            Toast.makeText(this,"Votre appareil ne supporte pas le bluetooth",Toast.LENGTH_SHORT);
+        if (bluetoothAdapter == null) {
+            Toast.makeText(this,"Votre appareil ne supporte pas le bluetooth",Toast.LENGTH_LONG).show();
         }
 
         // Mise en place du bouton de recherche
@@ -47,16 +48,23 @@ public class BeltActivity extends Activity {
         // Mise en place du bouton d'activation bluetooth
         buttonBluetooth = (Button) findViewById(R.id.button_belt_bluetooth);
         buttonBluetooth.setOnClickListener(clickListener);
-        if(bluetoothAdapter.isEnabled()) {
-            buttonBluetooth.setText(R.string.belt_desactiver);
+        if(bluetoothAdapter != null) {
+            if (bluetoothAdapter.isEnabled()) {
+                buttonBluetooth.setText(R.string.belt_desactiver);
+            } else {
+                buttonBluetooth.setText(R.string.belt_activer);
+                buttonSearch.setClickable(false);
+            }
         } else {
-            buttonBluetooth.setText(R.string.belt_activer);
+            buttonBluetooth.setText(R.string.belt_incompatible);
+            buttonBluetooth.setClickable(false);
             buttonSearch.setClickable(false);
         }
 
         // Mise en place de la liste de devices
         listDevices = (ListView) findViewById(R.id.list_belt);
         listDevices.setAdapter(arrayDevices);
+        listDevices.setOnItemClickListener(onItemClickListener);
 
         // Register the BroadcastReceiver
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
@@ -82,9 +90,9 @@ public class BeltActivity extends Activity {
                 // Case button search
                 case R.id.button_belt_search:
                     // Récupération des périphériques appairés
+                    arrayDevices.clear();
                     Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
                     if (pairedDevices.size() > 0) {
-                        arrayDevices.clear();
                         for (BluetoothDevice device : pairedDevices) {
                             arrayDevices.add(device.getName() + "\n" + device.getAddress());
                         }
@@ -95,6 +103,16 @@ public class BeltActivity extends Activity {
                     bluetoothAdapter.startDiscovery();
                     break;
             }
+        }
+    };
+
+    private AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            TextView device = (TextView) findViewById(R.id.text_device);
+            TextView selected = (TextView) view;
+            String[] text = selected.getText().toString().split("\n");
+            device.setText("Périphérique selectionné : " + text[0]);
         }
     };
 

@@ -14,5 +14,7 @@
 
     <string name="belt_activer">Activer Bluetooth</string>
     <string name="belt_desactiver">Désactiver Bluetooth</string>
-    <string name="belt_search">Chercher ceinture</string>
+    <string name="belt_incompatible">Pas de bluetooth</string>
+    <string name="belt_search">Scanner</string>
+    <string name="belt_device">Aucun périphérique selectionné</string>
 </resources>

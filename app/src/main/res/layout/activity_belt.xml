@@ -11,13 +11,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/button_belt_bluetooth"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/belt_search"
         android:id="@+id/button_belt_search"
+        android:layout_alignTop="@+id/button_belt_bluetooth"
+        android:layout_alignRight="@+id/list_belt"
+        android:layout_alignEnd="@+id/list_belt" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/belt_device"
+        android:id="@+id/text_device"
         android:layout_below="@+id/button_belt_bluetooth"
         android:layout_centerHorizontal="true" />
 
@@ -25,10 +37,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/list_belt"
-        android:layout_below="@+id/button_belt_search"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/text_device" />
 
 </RelativeLayout>
