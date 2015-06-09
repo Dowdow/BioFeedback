@@ -30,7 +30,10 @@ public class BiofeedbackActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         if(beltConnector != null) {
-            beltConnector.stop();
+            try {
+                beltConnector.stop();
+            } catch (Exception e) {
+            }
         }
     }
 }

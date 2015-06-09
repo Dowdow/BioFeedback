@@ -23,13 +23,14 @@ public class ZephyrConnectedListener extends ConnectListenerImpl implements Conn
     @Override
     public void Connected(ConnectedEvent<BTClient> eventArgs) {
         super.Connected(eventArgs);
-        zephyrProtocol = new ZephyrProtocol(eventArgs.getSource().getComms(), new PacketTypeRequest());
+        zephyrProtocol = new ZephyrProtocol(eventArgs.getSource().getComms(), createPacketTypeRequest());
         zephyrPacketListener = new belt_connector.ZephyrPacketListener();
         zephyrProtocol.addZephyrPacketEventListener(zephyrPacketListener);
+    }
 
-        zephyrProtocol.SetSummaryDataPacket(true);
-        zephyrProtocol.SetEventPacket(true);
-
-        System.out.println("Apparemment tu es connecté pélo !");
+    private PacketTypeRequest createPacketTypeRequest() {
+        PacketTypeRequest packetTypeRequest = new PacketTypeRequest();
+        packetTypeRequest.EnableSummary(true);
+        return packetTypeRequest;
     }
 }
