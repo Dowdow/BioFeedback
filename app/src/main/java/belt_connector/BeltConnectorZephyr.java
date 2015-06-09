@@ -11,20 +11,18 @@ public class BeltConnectorZephyr extends BeltConnector {
     private BTClient btClient;
     private BluetoothAdapter bluetoothAdapter;
     private ZephyrConnectedListener zephyrConnectedListener;
-    private String macAddress;
 
     public BeltConnectorZephyr(String macAddress) {
         super();
         if(!macAddress.matches("^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$")) {
             throw new IllegalArgumentException("L'adresse MAC n'est pas valide");
         }
-        this.macAddress = macAddress;
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
             throw new NullPointerException("L'appareil ne supporte pas le bluetooth");
         }
         btClient = new BTClient(bluetoothAdapter, macAddress);
-        zephyrConnectedListener = new ZephyrConnectedListener(new Handler(), null, btClient.getComms());
+        zephyrConnectedListener = new ZephyrConnectedListener(new Handler(), null);
         btClient.addConnectedEventListener(zephyrConnectedListener);
     }
 

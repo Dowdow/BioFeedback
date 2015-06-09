@@ -8,6 +8,8 @@ import android.view.View;
 
 public class MainActivity extends Activity {
 
+    public static String macAddress = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
