@@ -1,9 +1,11 @@
 package belt_connector;
 
+import java.util.Observable;
+
 import zephyr.android.BioHarnessBT.ZephyrPacketArgs;
 import zephyr.android.BioHarnessBT.ZephyrPacketEvent;
 
-public class ZephyrPacketListener implements zephyr.android.BioHarnessBT.ZephyrPacketListener {
+public class ZephyrPacketListener extends Observable implements zephyr.android.BioHarnessBT.ZephyrPacketListener {
 
     public static final int SUMMARY_PACKET_ID = 0x2b;
 
@@ -16,6 +18,7 @@ public class ZephyrPacketListener implements zephyr.android.BioHarnessBT.ZephyrP
         if(zephyrPacket.getMsgID() == SUMMARY_PACKET_ID) {
             ZephyrSummaryPacket zephyrSummaryPacket = new ZephyrSummaryPacket();
             zephyrSummaryPacket.initialize(zephyrPacket.getBytes());
+            notifyObservers(zephyrSummaryPacket);
         }
     }
 }

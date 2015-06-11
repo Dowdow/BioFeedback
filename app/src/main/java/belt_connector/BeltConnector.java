@@ -1,7 +1,10 @@
 package belt_connector;
 
 
-public abstract class BeltConnector {
+import java.util.Observable;
+import java.util.Observer;
+
+public abstract class BeltConnector extends Observable {
 
     public abstract void start();
 

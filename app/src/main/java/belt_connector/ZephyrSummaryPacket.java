@@ -17,17 +17,17 @@ public class ZephyrSummaryPacket {
 
     private int heartRate;
 
-    private int respirationRate;
+    private float respirationRate;
 
-    private int skinTemperature;
+    private float skinTemperature;
 
     private int posture;
 
-    private int activity;
+    private float activity;
 
-    private int peakAcceleration;
+    private float peakAcceleration;
 
-    private int batteryVoltage;
+    private float batteryVoltage;
 
     private int batteryLevel;
 
@@ -37,9 +37,9 @@ public class ZephyrSummaryPacket {
 
     private int breathingRateConfidence;
 
-    private int ecgAmplitude;
+    private float ecgAmplitude;
 
-    private int ecgNoise;
+    private float ecgNoise;
 
     private int heartRateConfidence;
 
@@ -51,19 +51,19 @@ public class ZephyrSummaryPacket {
 
     private int rog;
 
-    private int verticalAxisAccelerationMin;
+    private float verticalAxisAccelerationMin;
 
-    private int verticalAxisAccelerationPeak;
+    private float verticalAxisAccelerationPeak;
 
-    private int lateralAxisAccelerationMin;
+    private float lateralAxisAccelerationMin;
 
-    private int lateralAxisAccelerationPeak;
+    private float lateralAxisAccelerationPeak;
 
-    private int sagittalAxisAccelerationMin;
+    private float sagittalAxisAccelerationMin;
 
-    private int sagittalAxisAccelerationPeak;
+    private float sagittalAxisAccelerationPeak;
 
-    private int deviceInternalTemp;
+    private float deviceInternalTemp;
 
     private int statusInfo;
 
@@ -73,7 +73,7 @@ public class ZephyrSummaryPacket {
 
     private int txPower;
 
-    private int estimatedCoreTemperature;
+    private float estimatedCoreTemperature;
 
     private int auxiliaryChannel1;
 
@@ -85,12 +85,6 @@ public class ZephyrSummaryPacket {
 
     // Initialise l'objet
     public void initialize(byte[] bytes) {
-        float x = bytes[54] & (bytes[55] << 8);
-
-        System.out.println("======================");
-        System.out.println("DIT : " + x);
-        System.out.println("======================");
-
         // 1 byte data
         setSequenceNumber(bytes[0]);
         setTimestampMonth(bytes[3]);
@@ -105,8 +99,46 @@ public class ZephyrSummaryPacket {
         setTxPower(bytes[60]);
 
         // 2 byte data
+        setTimestampYear(twoBytesToInt(bytes[2], bytes[1]));
+        setHeartRate(twoBytesToInt(bytes[11], bytes[10]));
+        setRespirationRate(twoBytesToFloat(bytes[13], bytes[12]) / 10);
+        setSkinTemperature(twoBytesToFloat(bytes[15], bytes[14]) / 10);
+        setPosture(twoBytesToInt(bytes[17], bytes[17]));
+        setActivity(twoBytesToFloat(bytes[19], bytes[18]) / 100);
+        setPeakAcceleration(twoBytesToFloat(bytes[21], bytes[20]) / 100);
+        setBatteryVoltage(twoBytesToFloat(bytes[23], bytes[22]) / 1000);
+        setBreathingWaveAmplitude(twoBytesToInt(bytes[26], bytes[25]));
+        setBreathingWaveNoise(twoBytesToInt(bytes[28], bytes[27]));
+        setEcgAmplitude(twoBytesToFloat(bytes[31], bytes[30]) / 1000000);
+        setEcgNoise(twoBytesToFloat(bytes[33], bytes[32]) / 1000000);
+        setHeartRateVariability(twoBytesToInt(bytes[36], bytes[35]));
+        setGsr(twoBytesToInt(bytes[39], bytes[38]));
+        setRog(twoBytesToInt(bytes[41], bytes[40]));
+        setVerticalAxisAccelerationMin(twoBytesToFloat(bytes[43], bytes[42]) / 100);
+        setVerticalAxisAccelerationPeak(twoBytesToFloat(bytes[45], bytes[44]) / 100);
+        setLateralAxisAccelerationMin(twoBytesToFloat(bytes[47], bytes[46]) / 100);
+        setLateralAxisAccelerationPeak(twoBytesToFloat(bytes[49], bytes[48]) / 100);
+        setSagittalAxisAccelerationMin(twoBytesToFloat(bytes[51], bytes[50]) / 100);
+        setSagittalAxisAccelerationPeak(twoBytesToFloat(bytes[53], bytes[52]) / 100);
+        setDeviceInternalTemp(twoBytesToFloat(bytes[55], bytes[54]) / 10);
+        setStatusInfo(twoBytesToInt(bytes[57], bytes[56]));
+        setEstimatedCoreTemperature(twoBytesToFloat(bytes[62], bytes[61]) / 10);
+        setAuxiliaryChannel1(twoBytesToInt(bytes[64], bytes[63]));
+        setAuxiliaryChannel2(twoBytesToInt(bytes[66], bytes[65]));
+        setAuxiliaryChannel3(twoBytesToInt(bytes[68], bytes[67]));
+        setReserved(twoBytesToInt(bytes[70], bytes[69]));
 
         // 4 byte data
+    }
+
+    // Transforme 2 bits en int
+    public int twoBytesToInt(byte b1, byte b2) {
+        return (int) ((b1 << 8) | (b2 & 0xFF));
+    }
+
+    // Transforme 2 bits en float
+    public float twoBytesToFloat(byte b1, byte b2) {
+        return (float) ((b1 << 8) | (b2 & 0xFF));
     }
 
     public int getSequenceNumber() {
@@ -165,19 +197,19 @@ public class ZephyrSummaryPacket {
         this.heartRate = heartRate;
     }
 
-    public int getRespirationRate() {
+    public float getRespirationRate() {
         return respirationRate;
     }
 
-    private void setRespirationRate(int respirationRate) {
+    private void setRespirationRate(float respirationRate) {
         this.respirationRate = respirationRate;
     }
 
-    public int getSkinTemperature() {
+    public float getSkinTemperature() {
         return skinTemperature;
     }
 
-    private void setSkinTemperature(int skinTemperature) {
+    private void setSkinTemperature(float skinTemperature) {
         this.skinTemperature = skinTemperature;
     }
 
@@ -189,27 +221,27 @@ public class ZephyrSummaryPacket {
         this.posture = posture;
     }
 
-    public int getActivity() {
+    public float getActivity() {
         return activity;
     }
 
-    private void setActivity(int activity) {
+    private void setActivity(float activity) {
         this.activity = activity;
     }
 
-    public int getPeakAcceleration() {
+    public float getPeakAcceleration() {
         return peakAcceleration;
     }
 
-    private void setPeakAcceleration(int peakAcceleration) {
+    private void setPeakAcceleration(float peakAcceleration) {
         this.peakAcceleration = peakAcceleration;
     }
 
-    public int getBatteryVoltage() {
+    public float getBatteryVoltage() {
         return batteryVoltage;
     }
 
-    private void setBatteryVoltage(int batteryVoltage) {
+    private void setBatteryVoltage(float batteryVoltage) {
         this.batteryVoltage = batteryVoltage;
     }
 
@@ -245,19 +277,19 @@ public class ZephyrSummaryPacket {
         this.breathingRateConfidence = breathingRateConfidence;
     }
 
-    public int getEcgAmplitude() {
+    public float getEcgAmplitude() {
         return ecgAmplitude;
     }
 
-    private void setEcgAmplitude(int ecgAmplitude) {
+    private void setEcgAmplitude(float ecgAmplitude) {
         this.ecgAmplitude = ecgAmplitude;
     }
 
-    public int getEcgNoise() {
+    public float getEcgNoise() {
         return ecgNoise;
     }
 
-    private void setEcgNoise(int ecgNoise) {
+    private void setEcgNoise(float ecgNoise) {
         this.ecgNoise = ecgNoise;
     }
 
@@ -301,59 +333,59 @@ public class ZephyrSummaryPacket {
         this.rog = rog;
     }
 
-    public int getVerticalAxisAccelerationMin() {
+    public float getVerticalAxisAccelerationMin() {
         return verticalAxisAccelerationMin;
     }
 
-    private void setVerticalAxisAccelerationMin(int verticalAxisAccelerationMin) {
+    private void setVerticalAxisAccelerationMin(float verticalAxisAccelerationMin) {
         this.verticalAxisAccelerationMin = verticalAxisAccelerationMin;
     }
 
-    public int getVerticalAxisAccelerationPeak() {
+    public float getVerticalAxisAccelerationPeak() {
         return verticalAxisAccelerationPeak;
     }
 
-    private void setVerticalAxisAccelerationPeak(int verticalAxisAccelerationPeak) {
+    private void setVerticalAxisAccelerationPeak(float verticalAxisAccelerationPeak) {
         this.verticalAxisAccelerationPeak = verticalAxisAccelerationPeak;
     }
 
-    public int getLateralAxisAccelerationMin() {
+    public float getLateralAxisAccelerationMin() {
         return lateralAxisAccelerationMin;
     }
 
-    private void setLateralAxisAccelerationMin(int lateralAxisAccelerationMin) {
+    private void setLateralAxisAccelerationMin(float lateralAxisAccelerationMin) {
         this.lateralAxisAccelerationMin = lateralAxisAccelerationMin;
     }
 
-    public int getLateralAxisAccelerationPeak() {
+    public float getLateralAxisAccelerationPeak() {
         return lateralAxisAccelerationPeak;
     }
 
-    private void setLateralAxisAccelerationPeak(int lateralAxisAccelerationPeak) {
+    private void setLateralAxisAccelerationPeak(float lateralAxisAccelerationPeak) {
         this.lateralAxisAccelerationPeak = lateralAxisAccelerationPeak;
     }
 
-    public int getSagittalAxisAccelerationMin() {
+    public float getSagittalAxisAccelerationMin() {
         return sagittalAxisAccelerationMin;
     }
 
-    private void setSagittalAxisAccelerationMin(int sagittalAxisAccelerationMin) {
+    private void setSagittalAxisAccelerationMin(float sagittalAxisAccelerationMin) {
         this.sagittalAxisAccelerationMin = sagittalAxisAccelerationMin;
     }
 
-    public int getSagittalAxisAccelerationPeak() {
+    public float getSagittalAxisAccelerationPeak() {
         return sagittalAxisAccelerationPeak;
     }
 
-    private void setSagittalAxisAccelerationPeak(int sagittalAxisAccelerationPeak) {
+    private void setSagittalAxisAccelerationPeak(float sagittalAxisAccelerationPeak) {
         this.sagittalAxisAccelerationPeak = sagittalAxisAccelerationPeak;
     }
 
-    public int getDeviceInternalTemp() {
+    public float getDeviceInternalTemp() {
         return deviceInternalTemp;
     }
 
-    private void setDeviceInternalTemp(int deviceInternalTemp) {
+    private void setDeviceInternalTemp(float deviceInternalTemp) {
         this.deviceInternalTemp = deviceInternalTemp;
     }
 
@@ -389,11 +421,11 @@ public class ZephyrSummaryPacket {
         this.txPower = txPower;
     }
 
-    public int getEstimatedCoreTemperature() {
+    public float getEstimatedCoreTemperature() {
         return estimatedCoreTemperature;
     }
 
-    private void setEstimatedCoreTemperature(int estimatedCoreTemperature) {
+    private void setEstimatedCoreTemperature(float estimatedCoreTemperature) {
         this.estimatedCoreTemperature = estimatedCoreTemperature;
     }
 

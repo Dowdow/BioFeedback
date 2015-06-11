@@ -4,9 +4,13 @@ package belt_connector;
 import android.bluetooth.BluetoothAdapter;
 import android.os.Handler;
 
-import zephyr.android.BioHarnessBT.BTClient;
+import java.util.Observable;
+import java.util.Observer;
 
-public class BeltConnectorZephyr extends BeltConnector {
+import zephyr.android.BioHarnessBT.BTClient;
+import zephyr.android.BioHarnessBT.ZephyrPacket;
+
+public class BeltConnectorZephyr extends BeltConnector implements Observer {
 
     private BTClient btClient;
     private BluetoothAdapter bluetoothAdapter;
@@ -22,7 +26,7 @@ public class BeltConnectorZephyr extends BeltConnector {
             throw new NullPointerException("L'appareil ne supporte pas le bluetooth");
         }
         btClient = new BTClient(bluetoothAdapter, macAddress);
-        zephyrConnectedListener = new ZephyrConnectedListener(new Handler(), null);
+        zephyrConnectedListener = new ZephyrConnectedListener(new Handler(), null, this);
         btClient.addConnectedEventListener(zephyrConnectedListener);
     }
 
@@ -37,4 +41,16 @@ public class BeltConnectorZephyr extends BeltConnector {
     }
 
 
+    @Override
+    public void update(Observable observable, Object data) {
+        ZephyrSummaryPacket zephyrSummaryPacket = (ZephyrSummaryPacket) data;
+        System.out.println("=======================");
+        System.out.println("Year : " + zephyrSummaryPacket.getTimestampYear());
+        System.out.println("Heart Rate : " + zephyrSummaryPacket.getHeartRate());
+        System.out.println("HRV : " + zephyrSummaryPacket.getHeartRateVariability());
+        System.out.println("Battery Voltage : " + zephyrSummaryPacket.getBatteryVoltage());
+        System.out.println("Battery level : " + zephyrSummaryPacket.getBatteryLevel() + "%");
+        System.out.println("=======================");
+        notifyObservers(data);
+    }
 }
