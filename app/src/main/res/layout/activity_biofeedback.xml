@@ -23,6 +23,17 @@
             android:layout_gravity="center" />
     </LinearLayout>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:id="@+id/text_zephyr"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:id="@+id/text_fake"/>
+
+<!--
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -54,5 +65,6 @@
 
         </RelativeLayout>
     </LinearLayout>
+    -->
 
 </LinearLayout>

@@ -18,6 +18,7 @@ public class ZephyrPacketListener extends Observable implements zephyr.android.B
         if(zephyrPacket.getMsgID() == SUMMARY_PACKET_ID) {
             ZephyrSummaryPacket zephyrSummaryPacket = new ZephyrSummaryPacket();
             zephyrSummaryPacket.initialize(zephyrPacket.getBytes());
+            setChanged();
             notifyObservers(zephyrSummaryPacket);
         }
     }

@@ -1,6 +1,5 @@
 package belt_connector;
 
-
 import android.bluetooth.BluetoothAdapter;
 import android.os.Handler;
 
@@ -40,17 +39,9 @@ public class BeltConnectorZephyr extends BeltConnector implements Observer {
         btClient.Close();
     }
 
-
     @Override
     public void update(Observable observable, Object data) {
-        ZephyrSummaryPacket zephyrSummaryPacket = (ZephyrSummaryPacket) data;
-        System.out.println("=======================");
-        System.out.println("Year : " + zephyrSummaryPacket.getTimestampYear());
-        System.out.println("Heart Rate : " + zephyrSummaryPacket.getHeartRate());
-        System.out.println("HRV : " + zephyrSummaryPacket.getHeartRateVariability());
-        System.out.println("Battery Voltage : " + zephyrSummaryPacket.getBatteryVoltage());
-        System.out.println("Battery level : " + zephyrSummaryPacket.getBatteryLevel() + "%");
-        System.out.println("=======================");
+        setChanged();
         notifyObservers(data);
     }
 }

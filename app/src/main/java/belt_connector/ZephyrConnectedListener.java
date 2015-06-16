@@ -1,7 +1,5 @@
 package belt_connector;
 
-
-import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
 
 import java.util.Observer;

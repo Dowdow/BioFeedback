@@ -1,6 +1,5 @@
 package belt_connector;
 
-
 import java.util.Observable;
 import java.util.Observer;
 

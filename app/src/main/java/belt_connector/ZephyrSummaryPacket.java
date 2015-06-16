@@ -1,6 +1,5 @@
 package belt_connector;
 
-
 public class ZephyrSummaryPacket {
 
     private int sequenceNumber;
