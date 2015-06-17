@@ -6,11 +6,11 @@
     <string name="main_boutton1">BioFeedback</string>
     <string name="main_boutton2">Connecter ceinture</string>
 
-    <string name="biofeedback_instructions">Instructions</string>
-    <string name="biofeedback_phase1">Phase de repos</string>
-    <string name="biofeedback_phase2">Phase de controle</string>
-    <string name="biofeedback_phase3">Phase d\'experimentation</string>
-    <string name="biofeedback_phase4">Phase de repos</string>
+    <string name="biofeedback_logOn">Démarrer Logs</string>
+    <string name="biofeedback_logOff">Arrêter Logs</string>
+    <string name="biofeedback_bioFeedback">BioFeedback</string>
+    <string name="biofeedback_fakeFeedback">Faux BioFeedback</string>
+    <string name="biofeedback_random">BioFeedback Aléatoire</string>
 
     <string name="belt_activer">Activer Bluetooth</string>
     <string name="belt_desactiver">Désactiver Bluetooth</string>
