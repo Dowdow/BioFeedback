@@ -17,6 +17,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Random;
 
 import belt_connector.BeltConnectorFake;
 import belt_connector.BeltConnectorZephyr;
@@ -28,38 +29,22 @@ public class BiofeedbackActivity extends Activity implements Observer {
     private BeltConnectorFake beltConnectorFake;
     private BiofeedbackActivityUpdater biofeedbackActivityUpdater;
 
+    final Context context = this;
     private TextView textZephyr;
     private TextView textFake;
-
-    final Context context = this;
     private Button buttonLogOn;
     private Button buttonLogOff;
     private Button buttonBioFeedback;
     private Button buttonFakeFeedback;
     private Button buttonRandom;
+
     private int random = 0;
+    private boolean log = false;
+    private String event;
 
-    /* FileWriter*/
-    FileWriter writer;
-    File root = Environment.getExternalStorageDirectory();
-    File folder = new File(root + "/biofeedback");
-
-
-    private void writeCsvData(String d, String e, String f) throws IOException {
-        String line = String.format("%s,%s,%s\n", d, e, f);
-        writer.write(line);
-    }
-    /* FileWriter */
-
-    private void enable(Button button){
-        button.setClickable(true);
-        button.setAlpha(1f);
-    }
-
-    private void disable(Button button){
-        button.setClickable(false);
-        button.setAlpha(0.5f);
-    }
+    private FileWriter writer;
+    private File root = Environment.getExternalStorageDirectory();
+    private File folder = new File(root + "/biofeedback");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,9 +100,38 @@ public class BiofeedbackActivity extends Activity implements Observer {
         if(observable instanceof BeltConnectorFake) {
             biofeedbackActivityUpdater.setHrv((int) data);
         } else if(observable instanceof BeltConnectorZephyr) {
-           biofeedbackActivityUpdater.setZephyrSummaryPacket((ZephyrSummaryPacket) data);
+            ZephyrSummaryPacket zephyrSummaryPacket = (ZephyrSummaryPacket) data;
+            biofeedbackActivityUpdater.setZephyrSummaryPacket(zephyrSummaryPacket);
+            if(log) {
+                if(event == null) {
+                    writeCsvData(String.valueOf(zephyrSummaryPacket.getHeartRate()),"","");
+                } else {
+                    writeCsvData(String.valueOf(zephyrSummaryPacket.getHeartRate()),"",event);
+                    event = null;
+                }
+            }
         }
         BiofeedbackActivity.this.runOnUiThread(biofeedbackActivityUpdater);
+    }
+
+    private void writeCsvData(String d, String e, String f) {
+        String line = String.format("%s,%s,%s\n", d, e, f);
+        try {
+            writer.write(line);
+        } catch (IOException e1) {
+            System.out.println("Impossible d'écrire dans le fichier");
+        }
+    }
+    /* FileWriter */
+
+    private void enable(Button button){
+        button.setClickable(true);
+        button.setAlpha(1f);
+    }
+
+    private void disable(Button button){
+        button.setClickable(false);
+        button.setAlpha(0.5f);
     }
 
     private View.OnClickListener clickListener = new View.OnClickListener() {
@@ -141,26 +155,21 @@ public class BiofeedbackActivity extends Activity implements Observer {
                                     try {
                                         writer = new FileWriter(gpxfile);
                                         writeCsvData("N° Participant:" + participant , " ", " ");
-                                        writeCsvData("125","","baseline");
-                                        writeCsvData("235", "", "");
-                                        writeCsvData("125", "5min", "");
+                                        writeCsvData("RR interval", "Time marker", "Event");
                                     } catch (IOException e) {
-                                        e.printStackTrace();
+                                        System.out.println("Erreur lor de la création du fichier");
                                     }
-                                    /* FileWriter */
-
-
+                                    log = true;
                                     //Switch des bouttons
                                     disable(buttonLogOn);
                                     enable(buttonLogOff);
-                                    enable(buttonBioFeedback);
+                                    disable(buttonBioFeedback);
                                     enable(buttonFakeFeedback);
                                     enable(buttonRandom);
                                 }
                             })
                             .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
-
                                 }
                             })
                             .setIcon(android.R.drawable.ic_dialog_alert);
@@ -171,15 +180,15 @@ public class BiofeedbackActivity extends Activity implements Observer {
 
                 // Case Stop Logs
                 case R.id.button_logOff:
+                    log = false;
                     /* FileWriter */
                     try {
                         writer.flush();
                         writer.close();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        System.out.println("Erreur lors de la fermeture du fichier");
                     }
-                    /* FileWriter */
-
+                    writer = null;
                     //Switch des bouttons
                     disable(buttonLogOff);
                     disable(buttonBioFeedback);
@@ -190,24 +199,44 @@ public class BiofeedbackActivity extends Activity implements Observer {
 
                 // Case Start BioFeedback
                 case R.id.button_bioFeedback:
+                    event = "biofeedback";
+                    biofeedbackActivityUpdater.setFake(false);
+                    disable(buttonBioFeedback);
+                    enable(buttonFakeFeedback);
                     break;
 
                 // Case Start FakeFeedback
                 case R.id.button_fakeFeedback:
+                    event = "fake biofeedback";
+                    biofeedbackActivityUpdater.setFake(true);
+                    disable(buttonFakeFeedback);
+                    enable(buttonBioFeedback);
                     break;
 
                 // Case Start Random
                 case R.id.button_random:
-                    if(random==0){
-                        /* generate random=1|2 */
-                        /* start feedback 1|2 */
-                    }else
-                    if(random==1){ /* BioFeedback Done */
-                        /* Start Fakefeedback */
+                    enable(buttonFakeFeedback);
+                    enable(buttonBioFeedback);
+                    if(random == 0){
+                        Random rand = new Random();
+                        random = rand.nextInt(2) + 1;
+                        if(random == 1) {
+                            event = "random biofeedback";
+                            biofeedbackActivityUpdater.setFake(false);
+                        } else if (random == 2) {
+                            event = "random fake biofeedback";
+                            biofeedbackActivityUpdater.setFake(true);
+                        }
+                    } else if(random == 1){
+                        /* BioFeedback Done */
+                        event = "random fake biofeedback";
+                        biofeedbackActivityUpdater.setFake(true);
                         random = 0;
-                    }else
-                    if(random==2){ /* FakeFeedback Done */
-                        /* Start BioFeedback */
+                    }
+                    else if(random == 2){
+                        /* FakeFeedback Done */
+                        event = "random biofeedback";
+                        biofeedbackActivityUpdater.setFake(false);
                         random = 0;
                     }
                     break;
@@ -219,10 +248,18 @@ public class BiofeedbackActivity extends Activity implements Observer {
     protected void onDestroy() {
         super.onDestroy();
         beltConnectorFake.stop();
-        if(beltConnectorZephyr != null) {
+        if (beltConnectorZephyr != null) {
             try {
                 beltConnectorZephyr.stop();
             } catch (Exception e) {
+            }
+        }
+        if (writer != null) {
+            try {
+                writer.flush();
+                writer.close();
+            } catch (IOException e) {
+                System.out.println("Erreur lors de la fermeture du fichier");
             }
         }
     }
