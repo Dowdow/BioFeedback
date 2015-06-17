@@ -16,12 +16,10 @@ public class BiofeedbackActivity extends Activity implements Observer {
 
     private BeltConnectorZephyr beltConnectorZephyr;
     private BeltConnectorFake beltConnectorFake;
+    private BiofeedbackActivityUpdater biofeedbackActivityUpdater;
 
     private TextView textZephyr;
     private TextView textFake;
-
-    private int hrv;
-    private ZephyrSummaryPacket zephyrSummaryPacket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +28,8 @@ public class BiofeedbackActivity extends Activity implements Observer {
 
         textZephyr = (TextView) findViewById(R.id.text_zephyr);
         textFake = (TextView) findViewById(R.id.text_fake);
+
+        biofeedbackActivityUpdater = new BiofeedbackActivityUpdater(textZephyr, textFake);
 
         beltConnectorFake = new BeltConnectorFake();
         beltConnectorFake.addObserver(this);
@@ -46,22 +46,12 @@ public class BiofeedbackActivity extends Activity implements Observer {
 
     @Override
     public void update(Observable observable, Object data) {
-        System.out.println("Coucou activity " + data.toString());
         if(observable instanceof BeltConnectorFake) {
-            hrv = (int) data;
-            System.out.println("=======================");
-            System.out.println("HRV : " + hrv);
-            System.out.println("=======================");
+            biofeedbackActivityUpdater.setHrv((int) data);
         } else if(observable instanceof BeltConnectorZephyr) {
-           zephyrSummaryPacket = (ZephyrSummaryPacket) data;
-            System.out.println("=======================");
-            System.out.println("Year : " + zephyrSummaryPacket.getTimestampYear());
-            System.out.println("Heart Rate : " + zephyrSummaryPacket.getHeartRate());
-            System.out.println("HRV : " + zephyrSummaryPacket.getHeartRateVariability());
-            System.out.println("Battery Voltage : " + zephyrSummaryPacket.getBatteryVoltage());
-            System.out.println("Battery level : " + zephyrSummaryPacket.getBatteryLevel() + "%");
-            System.out.println("=======================");
+           biofeedbackActivityUpdater.setZephyrSummaryPacket((ZephyrSummaryPacket) data);
         }
+        BiofeedbackActivity.this.runOnUiThread(biofeedbackActivityUpdater);
     }
 
     @Override
