@@ -37,6 +37,7 @@ public class BiofeedbackActivity extends Activity implements Observer {
     private TextView textFake;
     private Button buttonLogOn;
     private Button buttonLogOff;
+    private Button buttonEvent;
     private Button buttonBioFeedback;
     private Button buttonFakeFeedback;
     private Button buttonRandom;
@@ -73,6 +74,10 @@ public class BiofeedbackActivity extends Activity implements Observer {
         buttonLogOff = (Button) findViewById(R.id.button_logOff);
         buttonLogOff.setOnClickListener(clickListener);
         disable(buttonLogOff);
+
+        buttonEvent = (Button) findViewById(R.id.button_event);
+        buttonEvent.setOnClickListener(clickListener);
+        disable(buttonEvent);
 
         buttonBioFeedback = (Button) findViewById(R.id.button_bioFeedback);
         buttonBioFeedback.setOnClickListener(clickListener);
@@ -174,6 +179,7 @@ public class BiofeedbackActivity extends Activity implements Observer {
                                     //Switch des bouttons
                                     disable(buttonLogOn);
                                     enable(buttonLogOff);
+                                    enable(buttonEvent);
                                     disable(buttonBioFeedback);
                                     enable(buttonFakeFeedback);
                                     enable(buttonRandom);
@@ -202,10 +208,32 @@ public class BiofeedbackActivity extends Activity implements Observer {
                     writer = null;
                     //Switch des bouttons
                     disable(buttonLogOff);
+                    disable(buttonEvent);
                     disable(buttonBioFeedback);
                     disable(buttonFakeFeedback);
                     disable(buttonRandom);
                     enable(buttonLogOn);
+                    break;
+
+                case R.id.button_event:
+                    final EditText input2 = new EditText(context);
+                    AlertDialog.Builder alertDialogBuilder2 = new AlertDialog.Builder(context)
+                            .setTitle("Entrez le numéro du participant")
+                            .setMessage("Entrez le numéro de participant")
+                            .setView(input2)
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    event = input2.getText().toString();
+                                }
+                            })
+                            .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert);
+
+                    AlertDialog alertDialog2 = alertDialogBuilder2.create();
+                    alertDialog2.show();
                     break;
 
                 // Case Start BioFeedback

@@ -97,9 +97,9 @@ public class BiofeedbackActivityUpdater implements Runnable {
     }
 
     private void setRectPercentage(float empty, float full, float white) {
-        rectEmpty.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, empty));
-        rectFull.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, full));
-        rectWhite.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, white));
+        rectEmpty.setLayoutParams(new LinearLayout.LayoutParams(150, 0, empty));
+        rectFull.setLayoutParams(new LinearLayout.LayoutParams(150, 0, full));
+        rectWhite.setLayoutParams(new LinearLayout.LayoutParams(150, 0, white));
         if(fake) {
             if(hrv > 70) {
                 rectFull.setBackgroundColor(Color.parseColor("#84e7ae"));
