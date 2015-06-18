@@ -7,8 +7,11 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +41,10 @@ public class BiofeedbackActivity extends Activity implements Observer {
     private Button buttonFakeFeedback;
     private Button buttonRandom;
 
+    private ImageView rectEmpty;
+    private ImageView rectFull;
+    private ImageView rectWhite;
+
     private int random = 0;
     private boolean log = false;
     private String event;
@@ -53,6 +60,10 @@ public class BiofeedbackActivity extends Activity implements Observer {
 
         textZephyr = (TextView) findViewById(R.id.text_zephyr);
         textFake = (TextView) findViewById(R.id.text_fake);
+
+        rectEmpty = (ImageView) findViewById(R.id.rect_empty);
+        rectFull = (ImageView) findViewById(R.id.rect_full);
+        rectWhite = (ImageView) findViewById(R.id.rect_white);
 
         //Mise en place des bouttons
         buttonLogOn = (Button) findViewById(R.id.button_logOn);
@@ -75,7 +86,7 @@ public class BiofeedbackActivity extends Activity implements Observer {
         buttonRandom.setOnClickListener(clickListener);
         disable(buttonRandom);
 
-        biofeedbackActivityUpdater = new BiofeedbackActivityUpdater(textZephyr, textFake);
+        biofeedbackActivityUpdater = new BiofeedbackActivityUpdater(textZephyr, textFake, rectEmpty, rectFull, rectWhite);
 
         if(folder.exists() && folder.isDirectory()) {
         }else{
