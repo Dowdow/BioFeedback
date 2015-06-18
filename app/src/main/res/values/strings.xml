@@ -8,6 +8,7 @@
 
     <string name="biofeedback_logOn">Démarrer Logs</string>
     <string name="biofeedback_logOff">Arrêter Logs</string>
+    <string name="biofeedback_event">Evenements</string>
     <string name="biofeedback_bioFeedback">BioFeedback</string>
     <string name="biofeedback_fakeFeedback">Faux BioFeedback</string>
     <string name="biofeedback_random">BioFeedback Aléatoire</string>
