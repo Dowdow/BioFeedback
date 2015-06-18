@@ -5,7 +5,8 @@ import java.util.Observable;
 public class FakeThread extends Observable implements Runnable {
 
     private boolean start = true;
-    private int hrv = 50;
+    private int hrv = 70;
+    private boolean up = true;
 
     @Override
     public void run() {
@@ -23,7 +24,15 @@ public class FakeThread extends Observable implements Runnable {
     private void generateData() {
         setChanged();
         notifyObservers(new Integer(hrv));
-        hrv++;
+        if(hrv >= 90) {
+            up = false;
+        } else if(hrv <= 50) {
+            up = true;
+        }
+        if(up)
+            hrv++;
+        else
+            hrv--;
     }
 
     public void stop() {
