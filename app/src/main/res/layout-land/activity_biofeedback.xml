@@ -43,6 +43,19 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="70dp"
+            android:text="@string/biofeedback_event"
+            android:id="@+id/button_event"
+            android:textColor="#FFFFFF"
+            android:background="#84e7ae"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:textSize="@dimen/button_text_size"
+            android:layout_marginTop="40dp"
+            android:layout_weight="0.50" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
             android:text="@string/biofeedback_bioFeedback"
             android:id="@+id/button_bioFeedback"
             android:textColor="#FFFFFF"
