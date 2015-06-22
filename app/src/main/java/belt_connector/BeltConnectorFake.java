@@ -8,8 +8,8 @@ public class BeltConnectorFake extends BeltConnector implements Observer {
     private FakeThread fakeThread;
     private Thread thread;
 
-    public BeltConnectorFake() {
-        fakeThread = new FakeThread();
+    public BeltConnectorFake(int progression, int time) {
+        fakeThread = new FakeThread(progression, time);
         fakeThread.addObserver(this);
         thread = new Thread(fakeThread);
     }
