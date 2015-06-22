@@ -1,6 +1,6 @@
 package belt_connector;
 
-public class ZephyrSummaryPacket {
+public class ZephyrSummaryPacket extends ZephyrPacket {
 
     private int sequenceNumber;
 
@@ -82,7 +82,7 @@ public class ZephyrSummaryPacket {
 
     private int reserved;
 
-    // Initialise l'objet
+    @Override
     public void initialize(byte[] bytes) {
         // 1 byte data
         setSequenceNumber(bytes[0]);
@@ -128,16 +128,6 @@ public class ZephyrSummaryPacket {
         setReserved(twoBytesToInt(bytes[70], bytes[69]));
 
         // 4 byte data
-    }
-
-    // Transforme 2 bits en int
-    public int twoBytesToInt(byte b1, byte b2) {
-        return (int) ((b1 << 8) | (b2 & 0xFF));
-    }
-
-    // Transforme 2 bits en float
-    public float twoBytesToFloat(byte b1, byte b2) {
-        return (float) ((b1 << 8) | (b2 & 0xFF));
     }
 
     public int getSequenceNumber() {

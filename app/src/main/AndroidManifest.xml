@@ -22,7 +22,8 @@
         </activity>
         <activity
             android:name=".BiofeedbackActivity"
-            android:label="@string/title_activity_biofeedback" >
+            android:label="@string/title_activity_biofeedback"
+            android:configChanges="orientation|screenSize">
         </activity>
         <activity
             android:name=".BeltActivity"

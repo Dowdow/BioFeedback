@@ -4,13 +4,14 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +40,13 @@ public class BiofeedbackActivity extends Activity implements Observer {
     private Button buttonFakeFeedback;
     private Button buttonRandom;
 
+    private TextView textZephyr;
+    private TextView textFake;
+
+    private ImageView rectEmpty;
+    private ImageView rectFull;
+    private ImageView rectWhite;
+
     private int random = 0;
     private boolean log = false;
     private String event;
@@ -48,39 +56,9 @@ public class BiofeedbackActivity extends Activity implements Observer {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_biofeedback);
 
-        TextView textZephyr = (TextView) findViewById(R.id.text_zephyr);
-        TextView textFake = (TextView) findViewById(R.id.text_fake);
-
-        ImageView rectEmpty = (ImageView) findViewById(R.id.rect_empty);
-        ImageView rectFull = (ImageView) findViewById(R.id.rect_full);
-        ImageView rectWhite = (ImageView) findViewById(R.id.rect_white);
+        initUI();
 
         biofeedbackActivityUpdater = new BiofeedbackActivityUpdater(textZephyr, textFake, rectEmpty, rectFull, rectWhite);
-
-        //Mise en place des bouttons
-        buttonLogOn = (Button) findViewById(R.id.button_logOn);
-        buttonLogOn.setOnClickListener(clickListener);
-        enable(buttonLogOn);
-
-        buttonLogOff = (Button) findViewById(R.id.button_logOff);
-        buttonLogOff.setOnClickListener(clickListener);
-        disable(buttonLogOff);
-
-        buttonEvent = (Button) findViewById(R.id.button_event);
-        buttonEvent.setOnClickListener(clickListener);
-        disable(buttonEvent);
-
-        buttonBioFeedback = (Button) findViewById(R.id.button_bioFeedback);
-        buttonBioFeedback.setOnClickListener(clickListener);
-        disable(buttonBioFeedback);
-
-        buttonFakeFeedback = (Button) findViewById(R.id.button_fakeFeedback);
-        buttonFakeFeedback.setOnClickListener(clickListener);
-        disable(buttonFakeFeedback);
-
-        buttonRandom = (Button) findViewById(R.id.button_random);
-        buttonRandom.setOnClickListener(clickListener);
-        disable(buttonRandom);
 
         beltConnectorFake = new BeltConnectorFake();
         beltConnectorFake.addObserver(this);
@@ -96,32 +74,37 @@ public class BiofeedbackActivity extends Activity implements Observer {
     }
 
     @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        setContentView(R.layout.activity_biofeedback);
+
+        initUI();
+        biofeedbackActivityUpdater.setTextZephyr(textZephyr);
+        biofeedbackActivityUpdater.setTextFake(textFake);
+        biofeedbackActivityUpdater.setRectEmpty(rectEmpty);
+        biofeedbackActivityUpdater.setRectFull(rectFull);
+        biofeedbackActivityUpdater.setRectWhite(rectWhite);
+    }
+
+    @Override
     public void update(Observable observable, Object data) {
         if(observable instanceof BeltConnectorFake) {
             biofeedbackActivityUpdater.setHrv((int) data);
         } else if(observable instanceof BeltConnectorZephyr) {
-            ZephyrSummaryPacket zephyrSummaryPacket = (ZephyrSummaryPacket) data;
-            biofeedbackActivityUpdater.setZephyrSummaryPacket(zephyrSummaryPacket);
-            if(log) {
-                if(event == null) {
-                    fileWriter.writeCsvData(String.valueOf(zephyrSummaryPacket.getHeartRate()), "", "");
-                } else {
-                    fileWriter.writeCsvData(String.valueOf(zephyrSummaryPacket.getHeartRate()), "", event);
-                    event = null;
+            if(data instanceof ZephyrSummaryPacket) {
+                ZephyrSummaryPacket zephyrSummaryPacket = (ZephyrSummaryPacket) data;
+                biofeedbackActivityUpdater.setZephyrSummaryPacket(zephyrSummaryPacket);
+                if (log) {
+                    if (event == null) {
+                        fileWriter.writeCsvData(String.valueOf(zephyrSummaryPacket.getHeartRate()), "", "");
+                    } else {
+                        fileWriter.writeCsvData(String.valueOf(zephyrSummaryPacket.getHeartRate()), "", event);
+                        event = null;
+                    }
                 }
             }
         }
         BiofeedbackActivity.this.runOnUiThread(biofeedbackActivityUpdater);
-    }
-
-    private void enable(Button button){
-        button.setClickable(true);
-        button.setAlpha(1f);
-    }
-
-    private void disable(Button button){
-        button.setClickable(false);
-        button.setAlpha(0.5f);
     }
 
     private View.OnClickListener clickListener = new View.OnClickListener() {
@@ -173,6 +156,7 @@ public class BiofeedbackActivity extends Activity implements Observer {
                     enable(buttonLogOn);
                     break;
 
+                // Case event
                 case R.id.button_event:
                     final EditText inputEvent = new EditText(context);
                     inputEvent.setHint("Libellé de l'évènement");
@@ -198,7 +182,8 @@ public class BiofeedbackActivity extends Activity implements Observer {
                 // Case Start BioFeedback
                 case R.id.button_bioFeedback:
                     final EditText inputTime = new EditText(context);
-                    inputTime.setHint("Durée (secondes)");
+                    inputTime.setInputType(InputType.TYPE_CLASS_PHONE);
+                            inputTime.setHint("Durée (secondes)");
                     AlertDialog.Builder alertDialogBuilderBioFeedback = new AlertDialog.Builder(context)
                             .setTitle("Entrez la durée du biofeedback")
                             .setMessage("Entrez la durée du biofeedback")
@@ -227,9 +212,11 @@ public class BiofeedbackActivity extends Activity implements Observer {
                     LayoutInflater factory = LayoutInflater.from(context);
                     final View textEntryView = factory.inflate(R.layout.text_entry, null);
                     final EditText inputTime2 = (EditText) textEntryView.findViewById(R.id.editText1);
-                    final EditText inputProgression = (EditText) textEntryView.findViewById(R.id.editText2);
                     inputTime2.setHint("Durée (secondes)");
+                    inputTime2.setInputType(InputType.TYPE_CLASS_PHONE);
+                    final EditText inputProgression = (EditText) textEntryView.findViewById(R.id.editText2);
                     inputProgression.setHint("Progression (pourcentage)");
+                    inputProgression.setInputType(InputType.TYPE_CLASS_PHONE);
 
                     AlertDialog.Builder alertDialogBuilderFakeFeedback = new AlertDialog.Builder(context)
                             .setTitle("Entrez la durée/progression du biofeedback")
@@ -301,6 +288,49 @@ public class BiofeedbackActivity extends Activity implements Observer {
         if (fileWriter != null) {
             fileWriter.close();
         }
+    }
+
+    private void initUI() {
+        textZephyr = (TextView) findViewById(R.id.text_zephyr);
+        textFake = (TextView) findViewById(R.id.text_fake);
+
+        rectEmpty = (ImageView) findViewById(R.id.rect_empty);
+        rectFull = (ImageView) findViewById(R.id.rect_full);
+        rectWhite = (ImageView) findViewById(R.id.rect_white);
+
+        buttonLogOn = (Button) findViewById(R.id.button_logOn);
+        buttonLogOn.setOnClickListener(clickListener);
+        enable(buttonLogOn);
+
+        buttonLogOff = (Button) findViewById(R.id.button_logOff);
+        buttonLogOff.setOnClickListener(clickListener);
+        disable(buttonLogOff);
+
+        buttonEvent = (Button) findViewById(R.id.button_event);
+        buttonEvent.setOnClickListener(clickListener);
+        disable(buttonEvent);
+
+        buttonBioFeedback = (Button) findViewById(R.id.button_bioFeedback);
+        buttonBioFeedback.setOnClickListener(clickListener);
+        enable(buttonBioFeedback);
+
+        buttonFakeFeedback = (Button) findViewById(R.id.button_fakeFeedback);
+        buttonFakeFeedback.setOnClickListener(clickListener);
+        enable(buttonFakeFeedback);
+
+        buttonRandom = (Button) findViewById(R.id.button_random);
+        buttonRandom.setOnClickListener(clickListener);
+        enable(buttonRandom);
+    }
+
+    private void enable(Button button){
+        button.setClickable(true);
+        button.setAlpha(1f);
+    }
+
+    private void disable(Button button){
+        button.setClickable(false);
+        button.setAlpha(0.5f);
     }
 
 }

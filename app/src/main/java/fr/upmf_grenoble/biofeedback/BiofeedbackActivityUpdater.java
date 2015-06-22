@@ -125,4 +125,24 @@ public class BiofeedbackActivityUpdater implements Runnable {
     public void setFake(boolean fake) {
         this.fake = fake;
     }
+
+    public void setTextZephyr(TextView textZephyr) {
+        this.textZephyr = textZephyr;
+    }
+
+    public void setTextFake(TextView textFake) {
+        this.textFake = textFake;
+    }
+
+    public void setRectEmpty(ImageView rectEmpty) {
+        this.rectEmpty = rectEmpty;
+    }
+
+    public void setRectFull(ImageView rectFull) {
+        this.rectFull = rectFull;
+    }
+
+    public void setRectWhite(ImageView rectWhite) {
+        this.rectWhite = rectWhite;
+    }
 }
