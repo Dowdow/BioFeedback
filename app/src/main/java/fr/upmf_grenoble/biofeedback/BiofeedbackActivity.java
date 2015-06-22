@@ -5,10 +5,12 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -128,14 +130,15 @@ public class BiofeedbackActivity extends Activity implements Observer {
             switch (v.getId()) {
                 // Case Start Logs
                 case R.id.button_logOn:
-                    final EditText input = new EditText(context);
+                    final EditText inputParticipant = new EditText(context);
+                    inputParticipant.setHint("N° participant");
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context)
                             .setTitle("Entrez le numéro du participant")
                             .setMessage("Entrez le numéro de participant")
-                            .setView(input)
+                            .setView(inputParticipant)
                             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
-                                    String participant = input.getText().toString();
+                                    String participant = inputParticipant.getText().toString();
                                     fileWriter = new FileWriter(participant);
                                     log = true;
                                     //Switch des bouttons
@@ -171,14 +174,15 @@ public class BiofeedbackActivity extends Activity implements Observer {
                     break;
 
                 case R.id.button_event:
-                    final EditText input2 = new EditText(context);
+                    final EditText inputEvent = new EditText(context);
+                    inputEvent.setHint("Libellé de l'évènement");
                     AlertDialog.Builder alertDialogBuilder2 = new AlertDialog.Builder(context)
-                            .setTitle("Entrez le numéro du participant")
-                            .setMessage("Entrez le numéro de participant")
-                            .setView(input2)
+                            .setTitle("Entrez le libellé de l'évènement")
+                            .setMessage("Entrez le libellé de l'évènement")
+                            .setView(inputEvent)
                             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
-                                    event = input2.getText().toString();
+                                    event = inputEvent.getText().toString();
                                 }
                             })
                             .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
@@ -193,18 +197,63 @@ public class BiofeedbackActivity extends Activity implements Observer {
 
                 // Case Start BioFeedback
                 case R.id.button_bioFeedback:
-                    event = "biofeedback";
-                    biofeedbackActivityUpdater.setFake(false);
-                    disable(buttonBioFeedback);
-                    enable(buttonFakeFeedback);
+                    final EditText inputTime = new EditText(context);
+                    inputTime.setHint("Durée (secondes)");
+                    AlertDialog.Builder alertDialogBuilderBioFeedback = new AlertDialog.Builder(context)
+                            .setTitle("Entrez la durée du biofeedback")
+                            .setMessage("Entrez la durée du biofeedback")
+                            .setView(inputTime)
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    String time = inputTime.getText().toString();
+                                    event = "biofeedback";
+                                    biofeedbackActivityUpdater.setFake(false);
+                                    disable(buttonBioFeedback);
+                                    enable(buttonFakeFeedback);
+                                }
+                            })
+                            .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert);
+
+                    AlertDialog alertDialogBioFeedback = alertDialogBuilderBioFeedback.create();
+                    alertDialogBioFeedback.show();
                     break;
 
                 // Case Start FakeFeedback
                 case R.id.button_fakeFeedback:
-                    event = "fake biofeedback";
-                    biofeedbackActivityUpdater.setFake(true);
-                    disable(buttonFakeFeedback);
-                    enable(buttonBioFeedback);
+                    LayoutInflater factory = LayoutInflater.from(context);
+                    final View textEntryView = factory.inflate(R.layout.text_entry, null);
+                    final EditText inputTime2 = (EditText) textEntryView.findViewById(R.id.editText1);
+                    final EditText inputProgression = (EditText) textEntryView.findViewById(R.id.editText2);
+                    inputTime2.setHint("Durée (secondes)");
+                    inputProgression.setHint("Progression (pourcentage)");
+
+                    AlertDialog.Builder alertDialogBuilderFakeFeedback = new AlertDialog.Builder(context)
+                            .setTitle("Entrez la durée/progression du biofeedback")
+                            .setMessage("Entrez la durée/progression du biofeedback")
+                            .setView(textEntryView)
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    String time = inputTime2.getText().toString();
+                                    String progression = inputProgression.getText().toString();
+                                    event = "fake biofeedback";
+                                    biofeedbackActivityUpdater.setFake(true);
+                                    disable(buttonFakeFeedback);
+                                    enable(buttonBioFeedback);
+                                }
+                            })
+                            .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert);
+
+                    AlertDialog alertDialogFakeFeedback = alertDialogBuilderFakeFeedback.create();
+                    alertDialogFakeFeedback.show();
+
                     break;
 
                 // Case Start Random
