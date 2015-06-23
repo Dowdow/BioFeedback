@@ -48,6 +48,8 @@ public class ZephyrRRPacket extends ZephyrPacket {
 
     private int rToRSample17;
 
+    private int avgRToRSample;
+
     @Override
     public void initialize(byte[] bytes) {
         // 1 byte data
@@ -77,6 +79,11 @@ public class ZephyrRRPacket extends ZephyrPacket {
         setRToRSample17(twoBytesToInt(bytes[44], bytes[43]));
 
         // 4 byte data
+
+        // Calculating average
+        int sum = rToRSample0 + rToRSample1 + rToRSample2 + rToRSample3 + rToRSample4 + rToRSample5 + rToRSample6 + rToRSample7 + rToRSample8
+                + rToRSample9 + rToRSample10 + rToRSample11 + rToRSample12 + rToRSample13 + rToRSample14 + rToRSample15 + rToRSample16 + rToRSample17;
+        setAvgRToRSample(sum / 18);
     }
 
     public int getSequenceNumber() {
@@ -261,5 +268,13 @@ public class ZephyrRRPacket extends ZephyrPacket {
 
     private void setRToRSample17(int rToRSample17) {
         this.rToRSample17 = rToRSample17;
+    }
+
+    public int getAvgRToRSample() {
+        return avgRToRSample;
+    }
+
+    private void setAvgRToRSample(int avgRToRSample) {
+        this.avgRToRSample = avgRToRSample;
     }
 }

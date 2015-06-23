@@ -9,6 +9,7 @@
     tools:context="fr.upmf_grenoble.biofeedback.BiofeedbackActivity"
     android:background="@drawable/background_selector"
     android:orientation="horizontal">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -116,6 +117,12 @@
             android:shadowDy="1"
             android:shadowRadius="1"
             />
+
+        <ProgressBar
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:visibility="gone"
+            android:id="@+id/progress_bar"/>
 
         <ImageView
             android:id="@+id/rect_empty"

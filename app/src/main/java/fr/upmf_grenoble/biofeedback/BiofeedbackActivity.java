@@ -6,12 +6,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +32,7 @@ public class BiofeedbackActivity extends Activity implements Observer {
     private BeltConnectorZephyr beltConnectorZephyr;
     private BeltConnectorFake beltConnectorFake;
     private BiofeedbackActivityUpdater biofeedbackActivityUpdater;
+    private RRWindow rrWindow;
 
     private FileWriter fileWriter;
 
@@ -49,7 +52,7 @@ public class BiofeedbackActivity extends Activity implements Observer {
     private boolean booleanRandom = true;
 
     private TextView textProgression;
-
+    private ProgressBar progressBar;
     private ImageView rectEmpty;
     private ImageView rectFull;
     private ImageView rectWhite;
@@ -58,6 +61,23 @@ public class BiofeedbackActivity extends Activity implements Observer {
     private boolean log = false;
     private String event;
     private long time = 0;
+    private long bioFeedbackTimer = 0;
+    private int bioFeedbackLength = 0;
+    private boolean bioFeedbackStarted = false;
+
+    private Handler timerHandler = new Handler();
+    private Runnable timerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if(bioFeedbackTimer <= 0) {
+                timerHandler.removeCallbacks(this);
+                startFakeBiofeedback();
+            } else {
+                bioFeedbackTimer--;
+                timerHandler.postDelayed(this, 1000);
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +86,8 @@ public class BiofeedbackActivity extends Activity implements Observer {
 
         initUI();
 
-        biofeedbackActivityUpdater = new BiofeedbackActivityUpdater(context, textProgression, rectEmpty, rectFull, rectWhite, buttonBioFeedback, buttonFakeFeedback, buttonRandom);
+        biofeedbackActivityUpdater = new BiofeedbackActivityUpdater(context);
+        initAU();
 
         if(MainActivity.macAddress == null) {
             Toast.makeText(this, "Vous devez selectionner un appareil avant de faire le BioFeedback", Toast.LENGTH_LONG).show();
@@ -81,15 +102,8 @@ public class BiofeedbackActivity extends Activity implements Observer {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         setContentView(R.layout.activity_biofeedback);
-
         initUI();
-        biofeedbackActivityUpdater.setTextProgression(textProgression);
-        biofeedbackActivityUpdater.setRectEmpty(rectEmpty);
-        biofeedbackActivityUpdater.setRectFull(rectFull);
-        biofeedbackActivityUpdater.setRectWhite(rectWhite);
-        biofeedbackActivityUpdater.setButtonBioFeedback(buttonBioFeedback);
-        biofeedbackActivityUpdater.setButtonFakeFeedback(buttonFakeFeedback);
-        biofeedbackActivityUpdater.setButtonRandom(buttonRandom);
+        initAU();
     }
 
     @Override
@@ -98,26 +112,30 @@ public class BiofeedbackActivity extends Activity implements Observer {
             if(data instanceof Float) {
                 biofeedbackActivityUpdater.setHrv((float) data);
             } else {
-                biofeedbackActivityUpdater.setPopUp(true);
-                biofeedbackActivityUpdater.setEnableButtons(true);
-                booleanBioFeedback = true;
-                booleanFakeFeedback = true;
-                booleanRandom = true;
+                stopFakeBiofeedback();
             }
         } else if(observable instanceof BeltConnectorZephyr) {
             if(data instanceof ZephyrSummaryPacket) {
                 ZephyrSummaryPacket zephyrSummaryPacket = (ZephyrSummaryPacket) data;
-                biofeedbackActivityUpdater.setZephyrSummaryPacket(zephyrSummaryPacket);
-                if (log) {
-                    if (event == null) {
-                        fileWriter.writeCsvData(String.valueOf(zephyrSummaryPacket.getHeartRate()), "", "");
-                    } else {
-                        fileWriter.writeCsvData(String.valueOf(zephyrSummaryPacket.getHeartRate()), String.valueOf((System.currentTimeMillis() - time) / 1000), event);
-                        event = null;
-                    }
-                }
+                biofeedbackActivityUpdater.setHrv(zephyrSummaryPacket.getHeartRate());
+                writeLog(zephyrSummaryPacket.getHeartRate());
             } else if (data instanceof ZephyrRRPacket) {
                 ZephyrRRPacket zephyrRRPacket = (ZephyrRRPacket) data;
+                if(rrWindow != null) {
+                    boolean baselineDone = rrWindow.add(zephyrRRPacket);
+                    if(baselineDone && !bioFeedbackStarted) {
+                        startBiofeedback(rrWindow.getAvgRR());
+                    }
+                    if(bioFeedbackStarted) {
+                        int avg = rrWindow.getAvgRR();
+                        biofeedbackActivityUpdater.setHrv(avg);
+                        writeLog(avg);
+                        long currentTime = System.currentTimeMillis() - bioFeedbackTimer;
+                        if ((currentTime / 1000) >= bioFeedbackLength) {
+                            stopBiofeedback();
+                        }
+                    }
+                }
             }
         }
         BiofeedbackActivity.this.runOnUiThread(biofeedbackActivityUpdater);
@@ -205,10 +223,7 @@ public class BiofeedbackActivity extends Activity implements Observer {
                                 public void onClick(DialogInterface dialog, int which) {
                                     String time = inputTime.getText().toString();
                                     event = "biofeedback";
-                                    biofeedbackActivityUpdater.setFake(false);
-                                    disable(buttonBioFeedback); booleanBioFeedback = false;
-                                    disable(buttonFakeFeedback); booleanFakeFeedback = false;
-                                    disable(buttonRandom); booleanRandom = false;
+                                    prepareBiofeedback(Integer.parseInt(time));
                                 }
                             })
                             .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
@@ -241,7 +256,7 @@ public class BiofeedbackActivity extends Activity implements Observer {
                                     String time = inputTime2.getText().toString();
                                     String progression = inputProgression.getText().toString();
                                     event = "fake biofeedback";
-                                    startFakeBiofeedback(Integer.parseInt(progression), Integer.parseInt(time));
+                                    prepareFakeBiofeedback(Integer.parseInt(progression), Integer.parseInt(time));
                                 }
                             })
                             .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
@@ -278,21 +293,21 @@ public class BiofeedbackActivity extends Activity implements Observer {
                                         random = rand.nextInt(2) + 1;
                                         if(random == 1) {
                                             event = "random biofeedback";
-                                            biofeedbackActivityUpdater.setFake(false);
+                                            prepareBiofeedback(Integer.parseInt(time));
                                         } else if (random == 2) {
                                             event = "random fake biofeedback";
-                                            startFakeBiofeedback(Integer.parseInt(progression), Integer.parseInt(time));
+                                            prepareFakeBiofeedback(Integer.parseInt(progression), Integer.parseInt(time));
                                         }
                                     } else if(random == 1){
                                          /* BioFeedback Done */
                                         event = "random fake biofeedback";
-                                        startFakeBiofeedback(Integer.parseInt(progression), Integer.parseInt(time));
+                                        prepareFakeBiofeedback(Integer.parseInt(progression), Integer.parseInt(time));
                                         random = 0;
                                     }
                                     else if(random == 2){
                                          /* FakeFeedback Done */
                                         event = "random biofeedback";
-                                        biofeedbackActivityUpdater.setFake(false);
+                                        prepareBiofeedback(Integer.parseInt(time));
                                         random = 0;
                                     }
                                 }
@@ -313,6 +328,7 @@ public class BiofeedbackActivity extends Activity implements Observer {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        timerHandler.removeCallbacks(timerRunnable);
         if (beltConnectorFake != null) {
             beltConnectorFake.stop();
         }
@@ -328,18 +344,72 @@ public class BiofeedbackActivity extends Activity implements Observer {
         }
     }
 
-    private void startFakeBiofeedback(int progression, int time) {
-        biofeedbackActivityUpdater.setFake(true);
+    private void prepareBiofeedback(int time) {
+        rrWindow = new RRWindow();
+        bioFeedbackLength = time;
+        biofeedbackActivityUpdater.setEnableProgressBar(true);
+        disable(buttonBioFeedback); booleanBioFeedback = false;
+        disable(buttonFakeFeedback); booleanFakeFeedback = false;
+        disable(buttonRandom); booleanRandom = false;
+    }
+
+    private void startBiofeedback(int baseline) {
+        bioFeedbackStarted = true;
+        bioFeedbackTimer = System.currentTimeMillis();
+        biofeedbackActivityUpdater.setMin(0);
+        biofeedbackActivityUpdater.setMax(baseline * 2);
+        biofeedbackActivityUpdater.setStart(baseline);
+        biofeedbackActivityUpdater.calculDifference();
+        biofeedbackActivityUpdater.setEnableProgressBar(false);
+    }
+
+    public void stopBiofeedback() {
+        rrWindow = null;
+        bioFeedbackStarted = false;
+        biofeedbackActivityUpdater.setPopUp(true);
+        biofeedbackActivityUpdater.setEnableButtons(true);
+        booleanBioFeedback = true;
+        booleanFakeFeedback = true;
+        booleanRandom = true;
+    }
+
+    private void prepareFakeBiofeedback(int progression, int time) {
+        biofeedbackActivityUpdater.setEnableProgressBar(true);
         biofeedbackActivityUpdater.setMin(0);
         biofeedbackActivityUpdater.setMax(100);
         biofeedbackActivityUpdater.setStart(50);
         biofeedbackActivityUpdater.calculDifference();
         beltConnectorFake = new BeltConnectorFake(progression, time);
         beltConnectorFake.addObserver(BiofeedbackActivity.this);
-        beltConnectorFake.start();
         disable(buttonBioFeedback); booleanBioFeedback = false;
         disable(buttonFakeFeedback); booleanFakeFeedback = false;
         disable(buttonRandom); booleanRandom = false;
+        bioFeedbackTimer = 5;
+        timerHandler.postDelayed(timerRunnable, 1000);
+    }
+
+    private void startFakeBiofeedback() {
+        beltConnectorFake.start();
+        biofeedbackActivityUpdater.setEnableProgressBar(false);
+    }
+
+    private void stopFakeBiofeedback() {
+        biofeedbackActivityUpdater.setPopUp(true);
+        biofeedbackActivityUpdater.setEnableButtons(true);
+        booleanBioFeedback = true;
+        booleanFakeFeedback = true;
+        booleanRandom = true;
+    }
+
+    private void writeLog(int hrv) {
+        if (log) {
+            if (event == null) {
+                fileWriter.writeCsvData(String.valueOf(hrv), "", "");
+            } else {
+                fileWriter.writeCsvData(String.valueOf(hrv), String.valueOf((System.currentTimeMillis() - time) / 1000), event);
+                event = null;
+            }
+        }
     }
 
     private void initUI() {
@@ -348,6 +418,7 @@ public class BiofeedbackActivity extends Activity implements Observer {
         rectEmpty = (ImageView) findViewById(R.id.rect_empty);
         rectFull = (ImageView) findViewById(R.id.rect_full);
         rectWhite = (ImageView) findViewById(R.id.rect_white);
+        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
         buttonLogOn = (Button) findViewById(R.id.button_logOn);
         buttonLogOn.setOnClickListener(clickListener);
@@ -390,6 +461,17 @@ public class BiofeedbackActivity extends Activity implements Observer {
             enable(buttonRandom);
         else
             disable(buttonRandom);
+    }
+
+    private void initAU() {
+        biofeedbackActivityUpdater.setTextProgression(textProgression);
+        biofeedbackActivityUpdater.setRectEmpty(rectEmpty);
+        biofeedbackActivityUpdater.setRectFull(rectFull);
+        biofeedbackActivityUpdater.setRectWhite(rectWhite);
+        biofeedbackActivityUpdater.setProgressBar(progressBar);
+        biofeedbackActivityUpdater.setButtonBioFeedback(buttonBioFeedback);
+        biofeedbackActivityUpdater.setButtonFakeFeedback(buttonFakeFeedback);
+        biofeedbackActivityUpdater.setButtonRandom(buttonRandom);
     }
 
     private void enable(Button button){

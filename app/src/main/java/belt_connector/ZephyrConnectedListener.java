@@ -31,7 +31,7 @@ public class ZephyrConnectedListener extends ConnectListenerImpl implements Conn
 
     private PacketTypeRequest createPacketTypeRequest() {
         PacketTypeRequest packetTypeRequest = new PacketTypeRequest();
-        packetTypeRequest.EnableSummary(true);
+        packetTypeRequest.EnableTtoR(true);
         return packetTypeRequest;
     }
 }
