@@ -48,8 +48,7 @@ public class BiofeedbackActivity extends Activity implements Observer {
     private boolean booleanFakeFeedback = true;
     private boolean booleanRandom = true;
 
-    private TextView textZephyr;
-    private TextView textFake;
+    private TextView textProgression;
 
     private ImageView rectEmpty;
     private ImageView rectFull;
@@ -67,7 +66,7 @@ public class BiofeedbackActivity extends Activity implements Observer {
 
         initUI();
 
-        biofeedbackActivityUpdater = new BiofeedbackActivityUpdater(textZephyr, textFake, rectEmpty, rectFull, rectWhite, buttonBioFeedback, buttonFakeFeedback, buttonRandom);
+        biofeedbackActivityUpdater = new BiofeedbackActivityUpdater(context, textProgression, rectEmpty, rectFull, rectWhite, buttonBioFeedback, buttonFakeFeedback, buttonRandom);
 
         if(MainActivity.macAddress == null) {
             Toast.makeText(this, "Vous devez selectionner un appareil avant de faire le BioFeedback", Toast.LENGTH_LONG).show();
@@ -84,8 +83,7 @@ public class BiofeedbackActivity extends Activity implements Observer {
         setContentView(R.layout.activity_biofeedback);
 
         initUI();
-        biofeedbackActivityUpdater.setTextZephyr(textZephyr);
-        biofeedbackActivityUpdater.setTextFake(textFake);
+        biofeedbackActivityUpdater.setTextProgression(textProgression);
         biofeedbackActivityUpdater.setRectEmpty(rectEmpty);
         biofeedbackActivityUpdater.setRectFull(rectFull);
         biofeedbackActivityUpdater.setRectWhite(rectWhite);
@@ -100,6 +98,7 @@ public class BiofeedbackActivity extends Activity implements Observer {
             if(data instanceof Float) {
                 biofeedbackActivityUpdater.setHrv((float) data);
             } else {
+                biofeedbackActivityUpdater.setPopUp(true);
                 biofeedbackActivityUpdater.setEnableButtons(true);
                 booleanBioFeedback = true;
                 booleanFakeFeedback = true;
@@ -242,17 +241,7 @@ public class BiofeedbackActivity extends Activity implements Observer {
                                     String time = inputTime2.getText().toString();
                                     String progression = inputProgression.getText().toString();
                                     event = "fake biofeedback";
-                                    biofeedbackActivityUpdater.setFake(true);
-                                    biofeedbackActivityUpdater.setMin(0);
-                                    biofeedbackActivityUpdater.setMax(100);
-                                    biofeedbackActivityUpdater.setStart(50);
-                                    biofeedbackActivityUpdater.calculDifference();
-                                    beltConnectorFake = new BeltConnectorFake(Integer.parseInt(progression), Integer.parseInt(time));
-                                    beltConnectorFake.addObserver(BiofeedbackActivity.this);
-                                    beltConnectorFake.start();
-                                    disable(buttonBioFeedback); booleanBioFeedback = false;
-                                    disable(buttonFakeFeedback); booleanFakeFeedback = false;
-                                    disable(buttonRandom); booleanRandom = false;
+                                    startFakeBiofeedback(Integer.parseInt(progression), Integer.parseInt(time));
                                 }
                             })
                             .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
@@ -267,31 +256,55 @@ public class BiofeedbackActivity extends Activity implements Observer {
 
                 // Case Start Random
                 case R.id.button_random:
-                    disable(buttonBioFeedback); booleanBioFeedback = false;
-                    disable(buttonFakeFeedback); booleanFakeFeedback = false;
-                    disable(buttonRandom); booleanRandom = false;
-                    if(random == 0){
-                        Random rand = new Random();
-                        random = rand.nextInt(2) + 1;
-                        if(random == 1) {
-                            event = "random biofeedback";
-                            biofeedbackActivityUpdater.setFake(false);
-                        } else if (random == 2) {
-                            event = "random fake biofeedback";
-                            biofeedbackActivityUpdater.setFake(true);
-                        }
-                    } else if(random == 1){
-                        /* BioFeedback Done */
-                        event = "random fake biofeedback";
-                        biofeedbackActivityUpdater.setFake(true);
-                        random = 0;
-                    }
-                    else if(random == 2){
-                        /* FakeFeedback Done */
-                        event = "random biofeedback";
-                        biofeedbackActivityUpdater.setFake(false);
-                        random = 0;
-                    }
+                    LayoutInflater factoryRandom = LayoutInflater.from(context);
+                    final View textEntryViewRandom = factoryRandom.inflate(R.layout.text_entry, null);
+                    final EditText inputTimeRandom = (EditText) textEntryViewRandom.findViewById(R.id.editText1);
+                    inputTimeRandom.setHint("Durée (secondes)");
+                    inputTimeRandom.setInputType(InputType.TYPE_CLASS_PHONE);
+                    final EditText inputProgressionRandom = (EditText) textEntryViewRandom.findViewById(R.id.editText2);
+                    inputProgressionRandom.setHint("Progression (pourcentage)");
+                    inputProgressionRandom.setInputType(InputType.TYPE_CLASS_PHONE);
+
+                    AlertDialog.Builder alertDialogBuilderRandomFeedback = new AlertDialog.Builder(context)
+                            .setTitle("Entrez la durée/progression du biofeedback")
+                            .setMessage("Entrez la durée/progression du biofeedback")
+                            .setView(textEntryViewRandom)
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    String time = inputTimeRandom.getText().toString();
+                                    String progression = inputProgressionRandom.getText().toString();
+                                    if(random == 0){
+                                        Random rand = new Random();
+                                        random = rand.nextInt(2) + 1;
+                                        if(random == 1) {
+                                            event = "random biofeedback";
+                                            biofeedbackActivityUpdater.setFake(false);
+                                        } else if (random == 2) {
+                                            event = "random fake biofeedback";
+                                            startFakeBiofeedback(Integer.parseInt(progression), Integer.parseInt(time));
+                                        }
+                                    } else if(random == 1){
+                                         /* BioFeedback Done */
+                                        event = "random fake biofeedback";
+                                        startFakeBiofeedback(Integer.parseInt(progression), Integer.parseInt(time));
+                                        random = 0;
+                                    }
+                                    else if(random == 2){
+                                         /* FakeFeedback Done */
+                                        event = "random biofeedback";
+                                        biofeedbackActivityUpdater.setFake(false);
+                                        random = 0;
+                                    }
+                                }
+                            })
+                            .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert);
+
+                    AlertDialog alertDialogRandomFeedback = alertDialogBuilderRandomFeedback.create();
+                    alertDialogRandomFeedback.show();
                     break;
             }
         }
@@ -315,9 +328,22 @@ public class BiofeedbackActivity extends Activity implements Observer {
         }
     }
 
+    private void startFakeBiofeedback(int progression, int time) {
+        biofeedbackActivityUpdater.setFake(true);
+        biofeedbackActivityUpdater.setMin(0);
+        biofeedbackActivityUpdater.setMax(100);
+        biofeedbackActivityUpdater.setStart(50);
+        biofeedbackActivityUpdater.calculDifference();
+        beltConnectorFake = new BeltConnectorFake(progression, time);
+        beltConnectorFake.addObserver(BiofeedbackActivity.this);
+        beltConnectorFake.start();
+        disable(buttonBioFeedback); booleanBioFeedback = false;
+        disable(buttonFakeFeedback); booleanFakeFeedback = false;
+        disable(buttonRandom); booleanRandom = false;
+    }
+
     private void initUI() {
-        textZephyr = (TextView) findViewById(R.id.text_zephyr);
-        textFake = (TextView) findViewById(R.id.text_fake);
+        textProgression = (TextView) findViewById(R.id.text_progression);
 
         rectEmpty = (ImageView) findViewById(R.id.rect_empty);
         rectFull = (ImageView) findViewById(R.id.rect_full);

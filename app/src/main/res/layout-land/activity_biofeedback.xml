@@ -107,18 +107,20 @@
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:id="@+id/text_zephyr"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:id="@+id/text_fake"/>
+            android:layout_height="100dp"
+            android:gravity="center"
+            android:textSize="35sp"
+            android:id="@+id/text_progression"
+            android:shadowColor="#000000"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="1"
+            />
 
         <ImageView
             android:id="@+id/rect_empty"
             android:layout_height="0dp"
-            android:layout_width="150dp"
+            android:layout_width="200dp"
             android:layout_weight="50"
             android:src="@drawable/rectangle">
         </ImageView>
@@ -126,7 +128,7 @@
         <ImageView
             android:id="@+id/rect_full"
             android:layout_height="0dp"
-            android:layout_width="150dp"
+            android:layout_width="200dp"
             android:layout_weight="0"
             android:background="#000000"
             android:src="@drawable/rectangle">
@@ -135,7 +137,7 @@
         <ImageView
             android:id="@+id/rect_white"
             android:layout_height="0dp"
-            android:layout_width="150dp"
+            android:layout_width="200dp"
             android:layout_weight="50"
             android:background="#ffffff"
             android:src="@drawable/rectangle2">

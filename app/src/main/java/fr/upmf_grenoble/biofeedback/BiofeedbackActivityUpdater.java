@@ -1,5 +1,8 @@
 package fr.upmf_grenoble.biofeedback;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -7,11 +10,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import belt_connector.ZephyrSummaryPacket;
+import file_writer.FileWriter;
 
 public class BiofeedbackActivityUpdater implements Runnable {
 
-    private TextView textZephyr;
-    private TextView textFake;
+    private TextView textProgression;
 
     private ImageView rectEmpty;
     private ImageView rectFull;
@@ -21,8 +24,10 @@ public class BiofeedbackActivityUpdater implements Runnable {
     private Button buttonFakeFeedback;
     private Button buttonRandom;
 
-    private boolean enableButtons = false;
+    private Context context;
 
+    private boolean enableButtons = false;
+    private boolean popUp = false;
     private boolean fake = false;
 
     private float hrv = 0;
@@ -32,10 +37,10 @@ public class BiofeedbackActivityUpdater implements Runnable {
     private int start = 50;
     private ZephyrSummaryPacket zephyrSummaryPacket;
 
-    public BiofeedbackActivityUpdater(TextView textZephyr, TextView textFake, ImageView rectEmpty, ImageView rectFull, ImageView rectWhite,
+    public BiofeedbackActivityUpdater(Context context, TextView textProgression, ImageView rectEmpty, ImageView rectFull, ImageView rectWhite,
                                       Button buttonBioFeedback, Button buttonFakeFeedback, Button buttonRandom) {
-        this.textZephyr = textZephyr;
-        this.textFake = textFake;
+        this.context = context;
+        this.textProgression = textProgression;
         this.rectEmpty = rectEmpty;
         this.rectFull = rectFull;
         this.rectWhite = rectWhite;
@@ -46,10 +51,6 @@ public class BiofeedbackActivityUpdater implements Runnable {
 
     @Override
     public void run() {
-        if(zephyrSummaryPacket != null) {
-            textZephyr.setText("HRV Zephyr : " + zephyrSummaryPacket.getHeartRate());
-        }
-        textFake.setText("HRV Fake : " + hrv);
         float empty, full, white;
         if(fake) {
             if(hrv > start) {
@@ -76,7 +77,7 @@ public class BiofeedbackActivityUpdater implements Runnable {
                 white = 50;
                 setRectPercentage(empty, full, white);
             }
-            textFake.append(" Current");
+            updateProgression();
         } else {
             if(zephyrSummaryPacket != null) {
                 if (zephyrSummaryPacket.getHeartRate() > 70) {
@@ -104,15 +105,17 @@ public class BiofeedbackActivityUpdater implements Runnable {
                     setRectPercentage(empty, full, white);
                 }
             }
-            textZephyr.append(" Current");
         }
         manageButtons();
+        if(popUp){
+            showPopUp();
+        }
     }
 
     private void setRectPercentage(float empty, float full, float white) {
-        rectEmpty.setLayoutParams(new LinearLayout.LayoutParams(150, 0, empty));
-        rectFull.setLayoutParams(new LinearLayout.LayoutParams(150, 0, full));
-        rectWhite.setLayoutParams(new LinearLayout.LayoutParams(150, 0, white));
+        rectEmpty.setLayoutParams(new LinearLayout.LayoutParams(250, 0, empty));
+        rectFull.setLayoutParams(new LinearLayout.LayoutParams(250, 0, full));
+        rectWhite.setLayoutParams(new LinearLayout.LayoutParams(250, 0, white));
         if(fake) {
             if(hrv > start) {
                 rectFull.setBackgroundColor(Color.parseColor("#84e7ae"));
@@ -137,6 +140,35 @@ public class BiofeedbackActivityUpdater implements Runnable {
             enable(buttonRandom);
             enableButtons = false;
         }
+    }
+
+    private void updateProgression() {
+        float progression = hrv - start;
+        progression /= (difference / 2);
+        progression *= 100;
+        textProgression.setText("Progression : " + String.format("%.2f", progression) + "%");
+        if(hrv > start) {
+            textProgression.setTextColor(Color.parseColor("#84e7ae"));
+        } else if(hrv < start) {
+            textProgression.setTextColor(Color.parseColor("#f4a46f"));
+        } else {
+            textProgression.setTextColor(Color.parseColor("#FFFFFF"));
+        }
+    }
+
+    private void showPopUp() {
+        popUp = false;
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context)
+                .setTitle("BioFeedback terminé")
+                .setMessage("BioFeedback terminé")
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_info);
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
     }
 
     public void setZephyrSummaryPacket(ZephyrSummaryPacket zephyrSummaryPacket) {
@@ -167,12 +199,12 @@ public class BiofeedbackActivityUpdater implements Runnable {
         this.start = start;
     }
 
-    public void setTextZephyr(TextView textZephyr) {
-        this.textZephyr = textZephyr;
+    public void setPopUp(boolean popUp) {
+        this.popUp = popUp;
     }
 
-    public void setTextFake(TextView textFake) {
-        this.textFake = textFake;
+    public void setTextProgression(TextView textProgression) {
+        this.textProgression = textProgression;
     }
 
     public void setRectEmpty(ImageView rectEmpty) {
