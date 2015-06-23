@@ -10,7 +10,7 @@ public class RRWindow {
 
     public boolean add(ZephyrRRPacket zephyrRRPacket) {
         boolean full = false;
-        if(window.size() >= 5) {
+        if(window.size() >= 30) {
             window.removeFirst();
             full = true;
         }

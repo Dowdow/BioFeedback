@@ -27,7 +27,7 @@ public class BeltConnectorFake extends BeltConnector implements Observer {
 
     @Override
     public void stop() {
-        fakeThread.stop();
+        fakeThread.stop(true);
         try {
             thread.join();
         } catch (InterruptedException e) {

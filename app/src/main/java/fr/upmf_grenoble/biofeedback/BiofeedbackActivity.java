@@ -356,11 +356,11 @@ public class BiofeedbackActivity extends Activity implements Observer {
     private void startBiofeedback(int baseline) {
         bioFeedbackStarted = true;
         bioFeedbackTimer = System.currentTimeMillis();
+        biofeedbackActivityUpdater.setEnableProgressBar(false);
         biofeedbackActivityUpdater.setMin(0);
         biofeedbackActivityUpdater.setMax(baseline * 2);
         biofeedbackActivityUpdater.setStart(baseline);
         biofeedbackActivityUpdater.calculDifference();
-        biofeedbackActivityUpdater.setEnableProgressBar(false);
     }
 
     public void stopBiofeedback() {
@@ -389,8 +389,8 @@ public class BiofeedbackActivity extends Activity implements Observer {
     }
 
     private void startFakeBiofeedback() {
-        beltConnectorFake.start();
         biofeedbackActivityUpdater.setEnableProgressBar(false);
+        beltConnectorFake.start();
     }
 
     private void stopFakeBiofeedback() {

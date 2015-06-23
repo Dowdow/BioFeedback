@@ -54,13 +54,15 @@ public class FakeThread extends Observable implements Runnable {
             notifyObservers(currentProgression);
             currentTime--;
         } else {
-            stop();
+            stop(false);
         }
     }
 
-    public void stop() {
+    public void stop(boolean destroy) {
         start = false;
-        setChanged();
-        notifyObservers("Fini !");
+        if(!destroy) {
+            setChanged();
+            notifyObservers("Done");
+        }
     }
 }

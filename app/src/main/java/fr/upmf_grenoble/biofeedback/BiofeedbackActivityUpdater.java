@@ -11,9 +11,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import belt_connector.ZephyrSummaryPacket;
-import file_writer.FileWriter;
-
 public class BiofeedbackActivityUpdater implements Runnable {
 
     private TextView textProgression;
@@ -92,6 +89,14 @@ public class BiofeedbackActivityUpdater implements Runnable {
             full /= difference;
             full *= 100;
             white = 50;
+            if (full > ((difference / 2) * 0.9)) {
+                empty = difference;
+                empty /= 2;
+                empty *= 0.1;
+                full = difference;
+                full /= 2;
+                full *= 0.9;
+            }
             setRectPercentage(empty, full, white);
         } else if(hrv < start) {
             empty = 50;
@@ -101,6 +106,14 @@ public class BiofeedbackActivityUpdater implements Runnable {
             white = hrv - min;
             white /= difference;
             white *= 100;
+            if (full > ((difference / 2) * 0.9)) {
+                white = difference;
+                white /= 2;
+                white *= 0.1;
+                full = difference;
+                full /= 2;
+                full *= 0.9;
+            }
             setRectPercentage(empty, full, white);
         } else {
             empty = 50;
@@ -214,10 +227,6 @@ public class BiofeedbackActivityUpdater implements Runnable {
         rectWhite.setVisibility(View.VISIBLE);
     }
 
-    private void showProgression() {
-        textProgression.setVisibility(View.VISIBLE);
-    }
-
     private void showProgressBar() {
         progressBar.setVisibility(View.VISIBLE);
     }
@@ -226,10 +235,6 @@ public class BiofeedbackActivityUpdater implements Runnable {
         rectEmpty.setVisibility(View.GONE);
         rectFull.setVisibility(View.GONE);
         rectWhite.setVisibility(View.GONE);
-    }
-
-    private void hideProgression() {
-        textProgression.setVisibility(View.GONE);
     }
 
     private void hideProgressBar() {

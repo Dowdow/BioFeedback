@@ -83,6 +83,8 @@ public class ZephyrRRPacket extends ZephyrPacket {
         // Calculating average
         int sum = rToRSample0 + rToRSample1 + rToRSample2 + rToRSample3 + rToRSample4 + rToRSample5 + rToRSample6 + rToRSample7 + rToRSample8
                 + rToRSample9 + rToRSample10 + rToRSample11 + rToRSample12 + rToRSample13 + rToRSample14 + rToRSample15 + rToRSample16 + rToRSample17;
+        if(sum < 0)
+            sum *= -1;
         setAvgRToRSample(sum / 18);
     }
 
