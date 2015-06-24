@@ -29,6 +29,8 @@ import file_writer.FileWriter;
 
 public class BiofeedbackActivity extends Activity implements Observer {
 
+    private static final int WAITING_TIME_FAKE_BIOFEEDBACK = 70;
+
     private BeltConnectorZephyr beltConnectorZephyr;
     private BeltConnectorFake beltConnectorFake;
     private BiofeedbackActivityUpdater biofeedbackActivityUpdater;
@@ -384,7 +386,7 @@ public class BiofeedbackActivity extends Activity implements Observer {
         disable(buttonBioFeedback); booleanBioFeedback = false;
         disable(buttonFakeFeedback); booleanFakeFeedback = false;
         disable(buttonRandom); booleanRandom = false;
-        bioFeedbackTimer = 5;
+        bioFeedbackTimer = WAITING_TIME_FAKE_BIOFEEDBACK;
         timerHandler.postDelayed(timerRunnable, 1000);
     }
 
