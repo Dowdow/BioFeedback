@@ -30,11 +30,12 @@ public class BiofeedbackActivityUpdater implements Runnable {
     private boolean popUp = false;
     private boolean enableProgressBar = false;
 
-    private float hrv = 0;
-    private int min = 0;
-    private int max = 100;
-    private int difference = 100;
-    private int start = 50;
+    private double hrv = 0;
+    private double min = 0;
+    private double max = 100;
+    private double difference = 100;
+    private double start = 50;
+    private double last = 0;
 
     public BiofeedbackActivityUpdater(Context context) {
         this.context = context;
@@ -61,10 +62,10 @@ public class BiofeedbackActivityUpdater implements Runnable {
         }
     }
 
-    private void setRectPercentage(float empty, float full, float white) {
-        rectEmpty.setLayoutParams(new LinearLayout.LayoutParams(250, 0, empty));
-        rectFull.setLayoutParams(new LinearLayout.LayoutParams(250, 0, full));
-        rectWhite.setLayoutParams(new LinearLayout.LayoutParams(250, 0, white));
+    private void setRectPercentage(double empty, double full, double white) {
+        rectEmpty.setLayoutParams(new LinearLayout.LayoutParams(250, 0, (float) empty));
+        rectFull.setLayoutParams(new LinearLayout.LayoutParams(250, 0, (float) full));
+        rectWhite.setLayoutParams(new LinearLayout.LayoutParams(250, 0, (float) white));
         if(hrv > start) {
             rectFull.setBackgroundColor(Color.parseColor("#84e7ae"));
         } else {
@@ -80,7 +81,7 @@ public class BiofeedbackActivityUpdater implements Runnable {
     }
 
     private void updateRect() {
-        float empty, full, white;
+        double empty, full, white;
         if(hrv > start) {
             empty = max - hrv;
             empty /= difference;
@@ -124,10 +125,13 @@ public class BiofeedbackActivityUpdater implements Runnable {
     }
 
     private void updateProgression() {
-        float progression = hrv - start;
-        progression /= (difference / 2);
+        double progression = hrv - start;
+        progression /= start;
         progression *= 100;
-        textProgression.setText("Progression : " + String.format("%.2f", progression) + "%");
+        double lastProgression = hrv - last;
+        lastProgression /= last;
+        lastProgression *= 100;
+        textProgression.setText("Progression Totale : " + String.format("%.2f", progression) + "%\n" + "Progression : " + String.format("%.2f", lastProgression) + "%");
         if(hrv > start) {
             textProgression.setTextColor(Color.parseColor("#84e7ae"));
         } else if(hrv < start) {
@@ -135,6 +139,7 @@ public class BiofeedbackActivityUpdater implements Runnable {
         } else {
             textProgression.setTextColor(Color.parseColor("#FFFFFF"));
         }
+        last = hrv;
     }
 
     private void showPopUp() {
@@ -152,15 +157,15 @@ public class BiofeedbackActivityUpdater implements Runnable {
         alertDialog.show();
     }
 
-    public void setHrv(float hrv) {
+    public void setHrv(double hrv) {
         this.hrv = hrv;
     }
 
-    public void setMin(int min) {
+    public void setMin(double min) {
         this.min = min;
     }
 
-    public void setMax(int max) {
+    public void setMax(double max) {
         this.max = max;
     }
 
@@ -168,8 +173,12 @@ public class BiofeedbackActivityUpdater implements Runnable {
         this.difference = max -min;
     }
 
-    public void setStart(int start) {
+    public void setStart(double start) {
         this.start = start;
+    }
+
+    public void setLast(double last) {
+        this.last = last;
     }
 
     public void setPopUp(boolean popUp) {

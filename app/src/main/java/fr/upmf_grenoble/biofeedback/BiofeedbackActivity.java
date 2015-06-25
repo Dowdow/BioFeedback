@@ -29,7 +29,7 @@ import file_writer.FileWriter;
 
 public class BiofeedbackActivity extends Activity implements Observer {
 
-    private static final int WAITING_TIME_FAKE_BIOFEEDBACK = 70;
+    private static final int WAITING_TIME_FAKE_BIOFEEDBACK = 60;
 
     private BeltConnectorZephyr beltConnectorZephyr;
     private BeltConnectorFake beltConnectorFake;
@@ -123,15 +123,17 @@ public class BiofeedbackActivity extends Activity implements Observer {
                 writeLog(zephyrSummaryPacket.getHeartRate());
             } else if (data instanceof ZephyrRRPacket) {
                 ZephyrRRPacket zephyrRRPacket = (ZephyrRRPacket) data;
+                if(zephyrRRPacket.getFinalRtoRSample() != 0) {
+                    writeLog(zephyrRRPacket.getFinalRtoRSample());
+                }
                 if(rrWindow != null) {
-                    boolean baselineDone = rrWindow.add(zephyrRRPacket);
+                    boolean baselineDone = rrWindow.add(zephyrRRPacket.getFinalRtoRSample());
                     if(baselineDone && !bioFeedbackStarted) {
-                        startBiofeedback(rrWindow.getAvgRR());
+                        startBiofeedback(rrWindow.getSd1());
                     }
                     if(bioFeedbackStarted) {
-                        int avg = rrWindow.getAvgRR();
-                        biofeedbackActivityUpdater.setHrv(avg);
-                        writeLog(avg);
+                        double sd1 = rrWindow.getSd1();
+                        biofeedbackActivityUpdater.setHrv(sd1);
                         long currentTime = System.currentTimeMillis() - bioFeedbackTimer;
                         if ((currentTime / 1000) >= bioFeedbackLength) {
                             stopBiofeedback();
@@ -353,9 +355,10 @@ public class BiofeedbackActivity extends Activity implements Observer {
         disable(buttonBioFeedback); booleanBioFeedback = false;
         disable(buttonFakeFeedback); booleanFakeFeedback = false;
         disable(buttonRandom); booleanRandom = false;
+        BiofeedbackActivity.this.runOnUiThread(biofeedbackActivityUpdater);
     }
 
-    private void startBiofeedback(int baseline) {
+    private void startBiofeedback(double baseline) {
         bioFeedbackStarted = true;
         bioFeedbackTimer = System.currentTimeMillis();
         biofeedbackActivityUpdater.setEnableProgressBar(false);
@@ -363,6 +366,7 @@ public class BiofeedbackActivity extends Activity implements Observer {
         biofeedbackActivityUpdater.setMax(baseline * 2);
         biofeedbackActivityUpdater.setStart(baseline);
         biofeedbackActivityUpdater.calculDifference();
+        event = "baseline done";
     }
 
     public void stopBiofeedback() {
@@ -373,6 +377,7 @@ public class BiofeedbackActivity extends Activity implements Observer {
         booleanBioFeedback = true;
         booleanFakeFeedback = true;
         booleanRandom = true;
+        event = "biofeedback done";
     }
 
     private void prepareFakeBiofeedback(int progression, int time) {
@@ -388,11 +393,13 @@ public class BiofeedbackActivity extends Activity implements Observer {
         disable(buttonRandom); booleanRandom = false;
         bioFeedbackTimer = WAITING_TIME_FAKE_BIOFEEDBACK;
         timerHandler.postDelayed(timerRunnable, 1000);
+        BiofeedbackActivity.this.runOnUiThread(biofeedbackActivityUpdater);
     }
 
     private void startFakeBiofeedback() {
         biofeedbackActivityUpdater.setEnableProgressBar(false);
         beltConnectorFake.start();
+        event = "baseline done";
     }
 
     private void stopFakeBiofeedback() {
@@ -401,9 +408,10 @@ public class BiofeedbackActivity extends Activity implements Observer {
         booleanBioFeedback = true;
         booleanFakeFeedback = true;
         booleanRandom = true;
+        event = "fake biofeedback done";
     }
 
-    private void writeLog(int hrv) {
+    private void writeLog(double hrv) {
         if (log) {
             if (event == null) {
                 fileWriter.writeCsvData(String.valueOf(hrv), "", "");

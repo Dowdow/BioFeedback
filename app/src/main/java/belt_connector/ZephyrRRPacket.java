@@ -48,7 +48,7 @@ public class ZephyrRRPacket extends ZephyrPacket {
 
     private int rToRSample17;
 
-    private int avgRToRSample;
+    private int finalRtoRSample;
 
     @Override
     public void initialize(byte[] bytes) {
@@ -80,12 +80,45 @@ public class ZephyrRRPacket extends ZephyrPacket {
 
         // 4 byte data
 
-        // Calculating average
-        int sum = rToRSample0 + rToRSample1 + rToRSample2 + rToRSample3 + rToRSample4 + rToRSample5 + rToRSample6 + rToRSample7 + rToRSample8
-                + rToRSample9 + rToRSample10 + rToRSample11 + rToRSample12 + rToRSample13 + rToRSample14 + rToRSample15 + rToRSample16 + rToRSample17;
-        if(sum < 0)
-            sum *= -1;
-        setAvgRToRSample(sum / 18);
+        setFinalRtoRSample(0);
+        if(rToRSample0 > 0) {
+            setFinalRtoRSample(rToRSample0);
+        } else if(rToRSample1 > 0) {
+            setFinalRtoRSample(rToRSample1);
+        } else if(rToRSample2 > 0) {
+            setFinalRtoRSample(rToRSample2);
+        } else if(rToRSample3 > 0) {
+            setFinalRtoRSample(rToRSample3);
+        } else if(rToRSample4 > 0) {
+            setFinalRtoRSample(rToRSample4);
+        } else if(rToRSample5 > 0) {
+            setFinalRtoRSample(rToRSample5);
+        } else if(rToRSample6 > 0) {
+            setFinalRtoRSample(rToRSample6);
+        } else if(rToRSample7 > 0) {
+            setFinalRtoRSample(rToRSample7);
+        } else if(rToRSample8 > 0) {
+            setFinalRtoRSample(rToRSample8);
+        } else if(rToRSample9 > 0) {
+            setFinalRtoRSample(rToRSample9);
+        } else if(rToRSample10 > 0) {
+            setFinalRtoRSample(rToRSample10);
+        } else if(rToRSample11 > 0) {
+            setFinalRtoRSample(rToRSample11);
+        } else if(rToRSample12 > 0) {
+            setFinalRtoRSample(rToRSample12);
+        } else if(rToRSample13 > 0) {
+            setFinalRtoRSample(rToRSample13);
+        } else if(rToRSample14 > 0) {
+            setFinalRtoRSample(rToRSample14);
+        } else if(rToRSample15 > 0) {
+            setFinalRtoRSample(rToRSample15);
+        } else if(rToRSample16 > 0) {
+            setFinalRtoRSample(rToRSample16);
+        } else if(rToRSample17 > 0) {
+            setFinalRtoRSample(rToRSample17);
+        }
+
     }
 
     public int getSequenceNumber() {
@@ -272,11 +305,11 @@ public class ZephyrRRPacket extends ZephyrPacket {
         this.rToRSample17 = rToRSample17;
     }
 
-    public int getAvgRToRSample() {
-        return avgRToRSample;
+    public int getFinalRtoRSample() {
+        return finalRtoRSample;
     }
 
-    private void setAvgRToRSample(int avgRToRSample) {
-        this.avgRToRSample = avgRToRSample;
+    private void setFinalRtoRSample(int finalRtoRSample) {
+        this.finalRtoRSample = finalRtoRSample;
     }
 }
